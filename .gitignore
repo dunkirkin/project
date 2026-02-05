@@ -1,0 +1,18 @@
+# Virtual environment
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Django database (SQLite)
+db.sqlite3
+
+# Environment variables / secrets
+.env
+
+# VS Code settings (optional)
+.vscode/
+
+# Mac junk (optional)
+.DS_Store
