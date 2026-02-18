@@ -1,0 +1,21 @@
+<h1>Daily Logs</h1>
+
+{% for log in logs %}
+  <div style="border:1px solid #ccc; padding:10px; margin:10px 0;">
+    <h2>{{ log.user.username }} — {{ log.date }}</h2>
+    <p>Sleep: {{ log.sleep_hours }} hours (quality {{ log.sleep_quality }})</p>
+    <p>Wellness: {{ log.wellness }} | Stress: {{ log.stress }}</p>
+    <p>{{ log.notes }}</p>
+
+    <h3>Activities</h3>
+    <ul>
+      {% for a in log.activities.all %}
+        <li>{{ a.activity_type }} — {{ a.duration_min }} min (RPE {{ a.rpe }})</li>
+      {% empty %}
+        <li>No activities</li>
+      {% endfor %}
+    </ul>
+  </div>
+{% empty %}
+  <p>No logs yet.</p>
+{% endfor %}
