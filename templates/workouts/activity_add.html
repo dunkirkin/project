@@ -1,0 +1,9 @@
+<h1>Add Activity for {{ log.date }}</h1>
+
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Add</button>
+</form>
+
+<p><a href="/logs/">Back to logs</a></p>

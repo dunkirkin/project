@@ -1,7 +1,9 @@
+<p><a href="/logs/new/">+ New log</a></p>
 <h1>Daily Logs</h1>
 
 {% for log in logs %}
   <div style="border:1px solid #ccc; padding:10px; margin:10px 0;">
+    <p><a href="/logs/{{ log.id }}/activity/new/">+ Add activity</a></p>
     <h2>{{ log.user.username }} — {{ log.date }}</h2>
     <p>Sleep: {{ log.sleep_hours }} hours (quality {{ log.sleep_quality }})</p>
     <p>Wellness: {{ log.wellness }} | Stress: {{ log.stress }}</p>
