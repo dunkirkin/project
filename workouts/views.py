@@ -13,6 +13,18 @@ def logs_view(request):
     logs = DailyLog.objects.filter(user=request.user).prefetch_related("activities")
     return render(request, "workouts/logs.html", {"logs": logs})
 
+# allows user to delete logs
+# bugs out if try to delete other user's log
+@login_required
+def log_delete(request, log_id):
+    log = get_object_or_404(DailyLog, id=log_id, user=request.user)
+    
+    if request.method == "POST":
+        log.delete()
+        return redirect("logs")
+    
+    return render(request, "workouts/log_confirm_delete.html", {"log": log})
+
 # allows user to post logs, but requires a log in
 @login_required
 def log_create(request):
