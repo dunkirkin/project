@@ -6,7 +6,7 @@
     <p><a href="/logs/{{ log.id }}/activity/new/">+ Add activity</a></p>
     <h2>{{ log.user.username }} — {{ log.date }}</h2>
     <p>Sleep: {{ log.sleep_hours }} hours (quality {{ log.sleep_quality }})</p>
-    <p>Wellness: {{ log.wellness }} | Stress: {{ log.stress }}</p>
+    <p>Wellness 1-10: {{ log.wellness }} | Stress 1-10: {{ log.stress }}</p>
     <p>{{ log.notes }}</p>
 
     <h3>Activities</h3>
@@ -16,6 +16,12 @@
       {% empty %}
         <li>No activities</li>
       {% endfor %}
+
+    <form method="post" action="/logs/{{ log.id }}/delete/" style="display:inline;">
+    {% csrf_token %}
+    <button type="submit">Delete</button>
+    </form>
+
     </ul>
   </div>
 {% empty %}

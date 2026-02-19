@@ -1,0 +1,9 @@
+<h1>Delete log</h1>
+<p>Are you sure you want to delete the log for {{ log.date }}?</p>
+
+<form method="post">
+  {% csrf_token %}
+  <button type="submit">Yes, delete</button>
+</form>
+
+<p><a href="/logs/">Cancel</a></p>
