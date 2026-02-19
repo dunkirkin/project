@@ -1,5 +1,13 @@
+
+<div style="display:flex; justify-content: space-between; align-items:center;">
+  <h1>Daily Logs</h1>
+  <form method="post" action="{% url 'logout' %}" style="margin:0;">
+    {% csrf_token %}
+    <button type="submit">Logout</button>
+  </form>
+</div>
+
 <p><a href="/logs/new/">+ New log</a></p>
-<h1>Daily Logs</h1>
 
 {% for log in logs %}
   <div style="border:1px solid #ccc; padding:10px; margin:10px 0;">
@@ -19,7 +27,7 @@
 
     <form method="post" action="/logs/{{ log.id }}/delete/" style="display:inline;">
     {% csrf_token %}
-    <button type="submit">Delete</button>
+    <button type="submit">Delete Daily Log</button>
     </form>
 
     </ul>
