@@ -1,20 +1,152 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Sign Up</title>
+    <title>Sign Up | Athletic Insight</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background-image: url("{% static 'images/sunset_running.jpg' %}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .brand {
+            position: absolute;
+            top: 20px;
+            left: 30px;
+            color: black;
+            font-size: 22px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .signup-card {
+            background: rgba(255, 255, 255, 0.92);
+            padding: 40px;
+            width: 350px;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .signup-card h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            font-size: 14px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4A90E2;
+            border: none;
+            color: white;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #3a78c2;
+        }
+
+        .login-link {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .login-link a {
+            color: #4A90E2;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
 
-    <h1>Create Account</h1>
+    <div class="brand">Athletic Insight</div>
 
-    <form method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Sign Up</button>
-    </form>
+    <div class="signup-card">
+        <h2>Create Account</h2>
+        <form method="post">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div style="color: red; margin-bottom: 10px; font-size: 13px;">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
 
-    <p>Already have an account?</p>
-    <a href="{% url 'login' %}">Login</a>
+            <div class="form-group">
+                {{ form.username.label_tag }}
+                {{ form.username }}
+                {% if form.username.help_text %}
+                    <div style="color: gray; font-size: 12px; margin-top: 4px;">
+                        {{ form.username.help_text }}
+                    </div>
+                {% endif %}
+                {% if form.username.errors %}
+                    <div style="color: red; font-size: 12px; margin-top: 4px;">
+                        {{ form.username.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                {{ form.password1.label_tag }}
+                {{ form.password1 }}
+                {% if form.password1.help_text %}
+                    <div style="color: gray; font-size: 12px; margin-top: 4px;">
+                        {{ form.password1.help_text }}
+                    </div>
+                {% endif %}
+                {% if form.password1.errors %}
+                    <div style="color: red; font-size: 12px; margin-top: 4px;">
+                        {{ form.password1.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                {{ form.password2.label_tag }}
+                {{ form.password2 }}
+                {% if form.password2.help_text %}
+                    <div style="color: gray; font-size: 12px; margin-top: 4px;">
+                        {{ form.password2.help_text }}
+                    </div>
+                {% endif %}
+                {% if form.password2.errors %}
+                    <div style="color: red; font-size: 12px; margin-top: 4px;">
+                        {{ form.password2.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <button type="submit">Sign Up</button>
+        </form>
+
+        <div class="login-link">
+            Already have an account? <a href="{% url 'login' %}">Sign In</a>
+        </div>
+    </div>
 
 </body>
 </html>
