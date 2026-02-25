@@ -1,75 +1,98 @@
-<h1>Add Activity for {{ log.date }}</h1>
+{% load static %}
 
 <style>
-    body {
-    background-image: url("/static/images/hiking_bg.jpg");
+  body {
+    background-image: url("/static/images/random_bg.jpg");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, sans-serif;
   }
 
+  .form-container {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 40px;
+    border-radius: 10px;
+    width: 400px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  }
 
+  .form-container h2 {
+    margin-bottom: 25px;
+    text-align: center;
+  }
 
   .form-group {
     margin-bottom: 15px;
   }
 
   input, select {
-    padding: 6px;
+    width: 100%;
+    padding: 8px;
     font-size: 14px;
-  }
-
-  .small-input {
-    width: 60px;
-  }
-
-  .medium-input {
-    width: 200px;
-  }
-
-  .distance-group {
-    display: flex;
-    gap: 8px;
-    align-items: center;
+    border-radius: 5px;
+    border: 1px solid #ccc;
   }
 
   .submit-btn {
     margin-top: 15px;
-    padding: 6px 14px;
+    width: 100%;
+    padding: 10px;
+    background-color: black;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .submit-btn:hover {
+    opacity: 0.85;
+  }
+
+  .brand {
+    position: absolute;
+    top: 20px;
+    left: 30px;
+    color: black;
+    font-size: 22px;
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+
+  .back-link {
+    display: block;
+    margin-top: 15px;
+    text-align: center;
   }
 </style>
 
-<form method="post">
-  {% csrf_token %}
+<div class="brand">Athletic Insight</div>
 
-  <div class="form-group">
-    {{ form.name_of_activity.label_tag }}<br>
-    {{ form.name_of_activity }}
-  </div>
+<div class="form-container">
+  <h2>Add Activity</h2>
 
-  <div class="form-group">
-    {{ form.activity_type.label_tag }}<br>
-    {{ form.activity_type }}
-  </div>
+  <form method="post">
+    {% csrf_token %}
 
-  <div class="form-group">
-    {{ form.duration_min.label_tag }}<br>
-    {{ form.duration_min }}
-  </div>
+    {% if form.errors %}
+      <div style="color: red; margin-bottom: 10px;">
+        {{ form.errors }}
+      </div>
+    {% endif %}
 
-  <div class="form-group">
-    {{ form.distance.label_tag }}<br>
-    <div class="distance-group">
-      {{ form.distance }}
-      {{ form.distance_unit }}
-    </div>
-  </div>
+    {% for field in form %}
+      <div class="form-group">
+        {{ field.label_tag }}
+        {{ field }}
+      </div>
+    {% endfor %}
 
-  <div class="form-group">
-    {{ form.rpe.label_tag }}<br>
-    {{ form.rpe }}
-  </div>
+    <button type="submit" class="submit-btn">Save Log</button>
+  </form>
 
-  <button type="submit" class="submit-btn">Add</button>
-</form>
+  <a href="/logs/" class="back-link">Back to logs</a>
+</div>

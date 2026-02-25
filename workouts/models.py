@@ -60,7 +60,7 @@ class Activity(models.Model):
     duration_min = models.PositiveIntegerField(default=0)
     rpe = models.PositiveSmallIntegerField(null=True, blank=True) #rpe= Rate of Perceived Exertion so how hard they think it was
     distance = models.FloatField(null=True, blank=True)
-    distance_unit = models.CharField(max_length=10, choices=DISTANCE_UNITS, default="mi", null=True, blank="mi")
+    distance_unit = models.CharField(max_length=10, choices=DISTANCE_UNITS, default="Miles", null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 

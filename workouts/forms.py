@@ -11,7 +11,14 @@ class DailyLogForm(forms.ModelForm):
 class ActivityForm(forms.ModelForm):
     class Meta:
         model = Activity
-        fields = "__all__"
+        fields = [
+            'name_of_activity',
+            'activity_type',
+            'duration_min',
+            'distance',
+            'distance_unit',
+            'rpe'
+        ]
         widgets = {
             "name_of_activity": forms.TextInput(attrs={"class": "medium-input"}),
             "duration_min": forms.NumberInput(attrs={"class": "small-input"}),

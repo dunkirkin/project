@@ -1,9 +1,98 @@
-<h1>New Daily Log</h1>
+{% load static %}
 
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Save</button>
-</form>
+<style>
+  body {
+    background-image: url("/static/images/random_bg.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, sans-serif;
+  }
 
-<p><a href="/logs/">Back to logs</a></p>
+  .form-container {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 40px;
+    border-radius: 10px;
+    width: 400px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  }
+
+  .form-container h2 {
+    margin-bottom: 25px;
+    text-align: center;
+  }
+
+  .form-group {
+    margin-bottom: 15px;
+  }
+
+  input, select {
+    width: 100%;
+    padding: 8px;
+    font-size: 14px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+
+  .submit-btn {
+    margin-top: 15px;
+    width: 100%;
+    padding: 10px;
+    background-color: black;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .submit-btn:hover {
+    opacity: 0.85;
+  }
+
+  .brand {
+    position: absolute;
+    top: 20px;
+    left: 30px;
+    color: black;
+    font-size: 22px;
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+
+  .back-link {
+    display: block;
+    margin-top: 15px;
+    text-align: center;
+  }
+</style>
+
+<div class="brand">Athletic Insight</div>
+
+<div class="form-container">
+  <h2>New Daily Log</h2>
+
+  <form method="post">
+    {% csrf_token %}
+
+    {% if form.errors %}
+      <div style="color: red; margin-bottom: 10px;">
+        {{ form.errors }}
+      </div>
+    {% endif %}
+
+    {% for field in form %}
+      <div class="form-group">
+        {{ field.label_tag }}
+        {{ field }}
+      </div>
+    {% endfor %}
+
+    <button type="submit" class="submit-btn">Save Log</button>
+  </form>
+
+  <a href="/logs/" class="back-link">Back to logs</a>
+</div>
