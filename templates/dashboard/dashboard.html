@@ -33,7 +33,7 @@
     color: white;
     text-decoration: none;
     margin-bottom: 15px;
-    font-size: 14px;
+    font-size: 18px;
   }
 
   .sidebar a:hover {
@@ -64,6 +64,66 @@
     box-shadow: 0 4px 15px rgba(0,0,0,0.08);
     min-height: 200px;
   }
+
+  .metric-title {
+    text-align: center;
+    font-size: 22px;
+    font-weight: bold;
+    margin-top: 3px;
+    margin-bottom: 6px;
+  }
+
+  .metric-range {
+    text-align: center;
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 25px;
+  }
+
+  .metric-value {
+    text-align: center;
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+
+  .metric-subtext {
+    text-align: center;
+    font-size: 14px;
+    color: #777;
+  }
+
+  
+  
+  .chart-container {
+    margin-top: 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    height: 120px;
+  }
+
+  .bar-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
+    width: 100%;
+  }
+
+  .bar {
+    width: 20px;
+    background: orange;
+    border-radius: 4px;
+    transition: height 0.3s ease;
+  }
+
+  .bar-label {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #555;
+  }
+
 </style>
 
 <div class="layout">
@@ -84,8 +144,27 @@
     <div class="metrics-grid">
 
       <div class="metric-card">
-        <h3>Total Activity Time</h3>
-        <p>Metric coming next...</p>
+        <div class="metric-title">Activity Summary || {{seven_days_ago|date:"M j"}} - {{today|date:"M j"}}</div>
+
+       <div class="metric-value">
+           Total Activity Duration: {{total_hours}}h {{mins}}m || {{act_count}} activities completed
+       </div>
+
+       <div class="chart-container">
+        {% for item in chart_data %}
+          <div class="bar-wrapper">
+            <div class="bar"
+                 style="height: {{ item.height_percent }}%;">
+            </div>
+            <div class="bar-label">
+              {{ item.day_label }}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+
+
       </div>
 
       <div class="metric-card">
