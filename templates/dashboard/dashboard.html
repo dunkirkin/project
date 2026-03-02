@@ -1,4 +1,106 @@
 
-<h1>Dashboard</h1>
-<p>Welcome {{ request.user.username }}</p>
-<a href="/logs">Daily Logs</a>
+{% load static %}
+
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+  }
+
+  .layout {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 220px;
+    background-color: #111;
+    color: white;
+    padding: 30px 20px;
+  }
+
+  .sidebar h2 {
+    margin-top: 0;
+    margin-bottom: 30px;
+    font-size: 20px;
+    letter-spacing: 1px;
+  }
+
+  .sidebar a {
+    display: block;
+    color: white;
+    text-decoration: none;
+    margin-bottom: 15px;
+    font-size: 14px;
+  }
+
+  .sidebar a:hover {
+    opacity: 0.7;
+  }
+
+  /* Main Content */
+  .main {
+    flex: 1;
+    padding: 40px;
+  }
+
+  .main h1 {
+    margin-top: 0;
+  }
+
+  .metrics-grid {
+    margin-top: 30px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  .metric-card {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    min-height: 200px;
+  }
+</style>
+
+<div class="layout">
+  
+  <div class="sidebar">
+    <h2>Athletic Insight</h2>
+    <a href="/dashboard/">Dashboard</a>
+    <a href="/logs/">Daily Logs</a>
+    <a href="#">Tomorrow Plan</a>
+    <a href="#">History</a>
+    <a href="/accounts/logout/">Logout</a>
+  </div>
+
+  <div class="main">
+    <h1>Training Metrics</h1>
+    <p>Welcome {{ request.user.username }}</p>
+
+    <div class="metrics-grid">
+
+      <div class="metric-card">
+        <h3>Total Activity Time</h3>
+        <p>Metric coming next...</p>
+      </div>
+
+      <div class="metric-card">
+        <h3>Metric 2</h3>
+      </div>
+
+      <div class="metric-card">
+        <h3>Metric 3</h3>
+      </div>
+
+      <div class="metric-card">
+        <h3>Metric 4</h3>
+      </div>
+
+    </div>
+  </div>
+
+</div>
