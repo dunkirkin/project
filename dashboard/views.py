@@ -24,7 +24,7 @@ def dashboard_view(request):
     total_hours = total_act_mins // 60
     mins = total_act_mins % 60
     acts_counts = acts.count()
-    daily_total_mins = acts.values("daily_log__date").annotate(total=Sum("duration_min")) or 0
+    daily_total_mins = acts.values("daily_log__date").annotate(total=Sum("duration_min"))
 
     #Turning daily_total_min into dict
     totals_dict = {
@@ -100,6 +100,13 @@ def dashboard_view(request):
             "wellness_height": int(((log_entry.wellness if log_entry and log_entry.wellness else 0) / max_stress_well) * 100)
         })
 
+    # Basic recommendation for tomorrow
+    if avg_wellness >= 7 and avg_stress <= 4 and avg_daily_load < 300:
+        recommended_activity = "You seem well recovered. A moderate to hard workout is okay tomorrow."
+    elif avg_wellness >= 5 and avg_stress <= 6:
+        recommended_activity = "A moderate workout or light cardio is recommended tomorrow."
+    else:
+        recommended_activity = "Take it easy tomorrow. Light activity, walking, stretching, or rest is recommended."
 
     context = {
         "today" : today,
@@ -114,5 +121,6 @@ def dashboard_view(request):
         "avg_wellness": avg_wellness,
         "avg_stress": avg_stress,
         "wellness_chart_data": wellness_chart_data,
+        "recommended_activity": recommended_activity,
     }
     return render(request, "dashboard/dashboard.html", context)

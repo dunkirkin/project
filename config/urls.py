@@ -30,6 +30,7 @@ urlpatterns = [
 
     # Accounts
     path('accounts/', include('accounts.urls')),
+    path("accounts/", include("django.contrib.auth.urls")),
 
     #Dashboard View
     path('dashboard/', include('dashboard.urls'))
