@@ -30,12 +30,18 @@
     margin-bottom: 15px;
   }
 
-  input, select {
-    width: 100%;
-    padding: 8px;
-    font-size: 14px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
+  input, select, textarea {
+  width: 100%;
+  padding: 8px;
+  font-size: 14px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 100px;
   }
 
   .submit-btn {
@@ -91,7 +97,7 @@
       </div>
     {% endfor %}
 
-    <button type="submit" class="submit-btn">Save Log</button>
+    <button type="submit" class="submit-btn">Save Activity</button>
   </form>
 
   <a href="/logs/" class="back-link">Back to logs</a>

@@ -160,6 +160,12 @@
             — {{ a.duration_min }} min
             {% if a.rpe %} (RPE {{ a.rpe }}){% endif %}
             {% if a.distance %} | {{ a.distance }} {{ a.distance_unit }}{% endif %}
+
+            {% if a.notes %}
+              <div style="margin-top: 4px; font-size: 13px; color: #444;">
+                <strong>Notes:</strong> {{ a.notes }}
+              </div>
+            {% endif %}
           </li>
         {% empty %}
           <li>No activities yet.</li>

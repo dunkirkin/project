@@ -17,11 +17,17 @@ class ActivityForm(forms.ModelForm):
             'duration_min',
             'distance',
             'distance_unit',
-            'rpe'
+            'rpe',
+            'notes'
         ]
         widgets = {
             "name_of_activity": forms.TextInput(attrs={"class": "medium-input"}),
             "duration_min": forms.NumberInput(attrs={"class": "small-input"}),
             "distance": forms.NumberInput(attrs={"class": "small-input"}),
             "rpe": forms.NumberInput(attrs={"class": "small-input"}),
+            
+            "notes": forms.Textarea(attrs={
+                "rows": 3,
+                "placeholder": "Optional notes about this workout..."
+            }),
         }

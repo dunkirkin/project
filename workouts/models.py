@@ -109,6 +109,8 @@ class Activity(models.Model):
     ) #rpe= Rate of Perceived Exertion so how hard they think it was
     distance = models.FloatField(null=True, blank=True)
     distance_unit = models.CharField(max_length=10, choices=DISTANCE_UNITS, default="Miles", null=True, blank=True)
+    
+    notes = models.TextField(blank=True) # user can make notes for themselves for each workout
 
     created_at = models.DateTimeField(auto_now_add=True)
 
