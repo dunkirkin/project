@@ -12,12 +12,12 @@ from .models import DailyLog, Activity
 # <1 means typically shorter (e.g. swim is more intense per minute).
 ACTIVITY_DURATION_MULT = {
     "Run":          1.00,
-    "Bike":         1.10,
-    "Moutain Bike": 1.10,  # matches the spelling in Activity.ACTIVITY_CHOICES
-    "Hike":         1.20,
+    "Bike":         1.30,
+    "Moutain Bike": 1.20,  # matches the spelling in Activity.ACTIVITY_CHOICES
+    "Hike":         1.30,
     "Walk":         1.10,
-    "Swim":         0.70,
-    "Lift":         1.20,
+    "Swim":         0.50,
+    "Lift":         0.80,
     "Yoga":         0.85,
     "Sport":        1.00,
     "Other":        1.00,

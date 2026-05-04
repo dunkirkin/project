@@ -8,28 +8,28 @@
     padding: 6px 14px;
     border-radius: 5px;
     display: inline-block;
-    margin-bottom: 6px;
+    margin-bottom: 20px;
   }
 
   .back-link {
     display: inline-block;
-    color: #111;
+    color: rgba(255,255,255,0.8);
     text-decoration: none;
     font-size: 14px;
-    margin-bottom: 18px;
-    margin-top: 4px;
+    margin-bottom: 10px;
   }
-  .back-link:hover { color: black; }
+  .back-link:hover { color: white; }
 
   .total-bar {
-    background: rgba(155, 155, 155, 0.88);
+    background: rgba(130, 130, 130, 0.93);
     border-radius: 10px;
     padding: 18px 30px;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 40px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.10);
   }
 
   .total-item {
@@ -55,23 +55,24 @@
   }
 
   .activity-list {
-    background: rgba(155, 155, 155, 0.88);
+    background: rgba(130, 130, 130, 0.93);
     border-radius: 10px;
     overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.10);
   }
 
   .list-header {
     display: grid;
     grid-template-columns: 90px 1fr 100px 100px 90px;
-    padding: 10px 20px;
+    padding: 12px 20px;
     gap: 10px;
-    background: rgba(0,0,0,0.14);
+    background: rgba(0,0,0,0.18);
     font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.6px;
     color: #222;
+    border-bottom: 1px solid rgba(0,0,0,0.18);
   }
 
   .activity-row {
@@ -79,7 +80,7 @@
     grid-template-columns: 90px 1fr 100px 100px 90px;
     align-items: center;
     padding: 14px 20px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
+    border-bottom: 1px solid rgba(0,0,0,0.10);
     gap: 10px;
     transition: background 0.15s ease;
   }
@@ -89,7 +90,7 @@
   }
 
   .activity-row:hover {
-    background: rgba(255,255,255,0.07);
+    background: rgba(255,255,255,0.10);
   }
 
   .act-date {
@@ -123,11 +124,19 @@
     display: inline-block;
     font-size: 11px;
     font-weight: 600;
-    padding: 2px 9px;
+    padding: 3px 10px;
     border-radius: 10px;
-    background: rgba(0,0,0,0.12);
-    color: #111;
   }
+  .type-badge.Run,
+  .type-badge.Walk,
+  .type-badge.Hike     { background: #90caf9; color: #0d47a1; }
+  .type-badge.Bike,
+  .type-badge[class*="Bike"] { background: #a5d6a7; color: #1b5e20; }
+  .type-badge.Swim     { background: #81d4fa; color: #01579b; }
+  .type-badge.Lift     { background: #ef9a9a; color: #b71c1c; }
+  .type-badge.Yoga     { background: #ce93d8; color: #4a148c; }
+  .type-badge.Sport    { background: #ffcc80; color: #bf360c; }
+  .type-badge.Other    { background: #cccccc; color: #333; }
 
   .act-stat {
     font-size: 15px;
@@ -155,17 +164,18 @@
   }
 
   .empty-state {
-    background: rgba(155, 155, 155, 0.88);
+    background: rgba(130, 130, 130, 0.93);
     border-radius: 10px;
     padding: 60px 20px;
     text-align: center;
     color: black;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.10);
   }
   .empty-state p { font-size: 16px; margin-bottom: 14px; }
 
   .btn-logs {
     display: inline-block;
-    background: orange;
+    background: #FF9800;
     color: black;
     font-weight: bold;
     padding: 10px 22px;
@@ -219,7 +229,7 @@
 
         <div class="act-name">
           {{ activity.name_of_activity|default:activity.activity_type }}
-          <span><span class="type-badge">{{ activity.activity_type }}</span></span>
+          <span><span class="type-badge {{ activity.activity_type }}">{{ activity.activity_type }}</span></span>
         </div>
 
         <div class="act-stat">
