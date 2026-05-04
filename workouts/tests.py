@@ -9,13 +9,11 @@ from django.urls import reverse
 from .models import Activity, DailyLog
 from .views import ACTIVITY_DURATION_MULT, _scale_duration
 
+# Test cases
 
-# ──────────────────────────────────────────────────────────────
-#  MODEL TESTS
-# ──────────────────────────────────────────────────────────────
 
 class SleepScoreTest(TestCase):
-    """Tests for the DailyLog.sleep_score property."""
+    # Tests for the DailyLog.sleep_score property
 
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="pass")
@@ -30,33 +28,33 @@ class SleepScoreTest(TestCase):
         )
 
     def test_perfect_sleep_score(self):
-        """9 hours + quality 10 → score of 100."""
+        # 9 hours + quality 10 → score of 100
         log = self._make_log(sleep_hours=9, sleep_quality=10)
         self.assertEqual(log.sleep_score, 100)
 
     def test_no_sleep_data_returns_none(self):
-        """No sleep hours or quality → sleep_score is None."""
+        # No sleep hours or quality → sleep_score is None
         log = self._make_log(sleep_hours=None, sleep_quality=None)
         self.assertIsNone(log.sleep_score)
 
     def test_sleep_hours_capped_at_100(self):
-        """More than 9 hours still caps at 100% for the duration component."""
+        # More than 9 hours still caps at 100% for the duration component
         log = self._make_log(sleep_hours=12, sleep_quality=10)
         self.assertEqual(log.sleep_score, 100)
 
     def test_typical_sleep_score(self):
-        """7.5 hours + quality 8 → (7.5/9*100)*0.6 + (8/10*100)*0.4 = 50 + 32 = 82."""
+        # 7.5 hours + quality 8 → (7.5/9*100)*0.6 + (8/10*100)*0.4 = 50 + 32 = 82
         log = self._make_log(sleep_hours=Decimal("7.5"), sleep_quality=Decimal("8"))
         self.assertEqual(log.sleep_score, 82)
 
     def test_zero_values_return_none(self):
-        """Both 0 are treated as no data (falsy) → sleep_score returns None."""
+        # Both 0 are treated as no data (falsy) → sleep_score returns None
         log = self._make_log(sleep_hours=0, sleep_quality=0)
         self.assertIsNone(log.sleep_score)
 
 
 class RecoveryScoreTest(TestCase):
-    """Tests for the recovery score formula: sleep_quality + wellness - stress."""
+    # Tests for the recovery score formula: sleep_quality + wellness - stress
 
     def setUp(self):
         self.user = User.objects.create_user(username="testuser2", password="pass")
@@ -72,23 +70,23 @@ class RecoveryScoreTest(TestCase):
         )
 
     def test_maximum_recovery_score(self):
-        """sleep_quality=10, wellness=10, stress=0 → recovery = +20."""
+        # sleep_quality=10, wellness=10, stress=0 → recovery = +20
         log = self._make_log(10, 10, 0)
         self.assertEqual(float(log.sleep_quality) + float(log.wellness) - float(log.stress), 20)
 
     def test_minimum_recovery_score(self):
-        """sleep_quality=0, wellness=0, stress=10 → recovery = -10."""
+        # sleep_quality=0, wellness=0, stress=10 → recovery = -10
         log = self._make_log(0, 0, 10)
         self.assertEqual(float(log.sleep_quality) + float(log.wellness) - float(log.stress), -10)
 
     def test_typical_recovery_score(self):
-        """sleep_quality=7, wellness=8, stress=3 → recovery = 12."""
+        # sleep_quality=7, wellness=8, stress=3 → recovery = 12
         log = self._make_log(7, 8, 3)
         self.assertEqual(float(log.sleep_quality) + float(log.wellness) - float(log.stress), 12)
 
 
 class ValidatorTest(TestCase):
-    """Tests that model validators enforce 0–10 for wellness fields and 0–10 for RPE."""
+    # Tests that model validators enforce 0-10 for wellness fields and 0-10 for RPE
 
     def setUp(self):
         self.user = User.objects.create_user(username="validator_user", password="pass")
@@ -130,7 +128,7 @@ class ValidatorTest(TestCase):
             activity.full_clean()
 
     def test_rpe_decimal_is_valid(self):
-        """RPE of 7.5 (decimal) should be accepted."""
+        # RPE of 7.5 (decimal) should be accepted
         log = DailyLog.objects.create(user=self.user, date=self.today)
         activity = Activity(
             daily_log=log, activity_type="Run", name_of_activity="Morning Run",
@@ -143,10 +141,10 @@ class ValidatorTest(TestCase):
 
 
 class DurationScalingTest(TestCase):
-    """Tests for the _scale_duration helper and ACTIVITY_DURATION_MULT values."""
+    # Tests for the _scale_duration helper and ACTIVITY_DURATION_MULT values
 
     def test_swim_is_half(self):
-        """Swim multiplier is 0.5 — should return roughly half the base duration."""
+        # Swim multiplier is 0.5 — should return roughly half the base duration
         self.assertEqual(ACTIVITY_DURATION_MULT["Swim"], 0.5)
 
     def test_bike_multiplier(self):
@@ -156,20 +154,20 @@ class DurationScalingTest(TestCase):
         self.assertEqual(ACTIVITY_DURATION_MULT["Lift"], 0.80)
 
     def test_scale_duration_swim_rounds_to_5(self):
-        """60–80 min base × 0.5 → 30–40 min, both multiples of 5."""
+        # 60-80 min base x 0.5 → 30-40 min, both multiples of 5
         low, high = _scale_duration("Swim", 60, 80)
         self.assertEqual(low % 5, 0)
         self.assertEqual(high % 5, 0)
         self.assertLess(low, high)
 
     def test_scale_duration_high_never_equals_low(self):
-        """high must always be greater than low."""
+        # high must always be greater than low
         for atype in ACTIVITY_DURATION_MULT:
             low, high = _scale_duration(atype, 30, 30)
             self.assertGreater(high, low, msg=f"Failed for activity type: {atype}")
 
     def test_unknown_activity_type_defaults_to_1x(self):
-        """An unrecognized activity type defaults to 1.0 multiplier."""
+        # An unrecognized activity type defaults to 1.0 multiplier
         low, high = _scale_duration("Unknown", 60, 80)
         self.assertEqual(low, 60)
         self.assertEqual(high, 80)
@@ -180,7 +178,7 @@ class DurationScalingTest(TestCase):
 # ──────────────────────────────────────────────────────────────
 
 class DailyLogFormTest(TestCase):
-    """Tests that DailyLogForm validates input correctly."""
+    # Tests that DailyLogForm validates input correctly
 
     def _form(self, **kwargs):
         from .forms import DailyLogForm
@@ -215,7 +213,7 @@ class DailyLogFormTest(TestCase):
 
 
 class ActivityFormTest(TestCase):
-    """Tests that ActivityForm validates RPE and required fields."""
+    # Tests that ActivityForm validates RPE and required fields
 
     def _form(self, **kwargs):
         from .forms import ActivityForm
@@ -252,7 +250,7 @@ class ActivityFormTest(TestCase):
 # ──────────────────────────────────────────────────────────────
 
 class AuthRedirectTest(TestCase):
-    """Unauthenticated users should be redirected to login for all protected views."""
+    # Unauthenticated users should be redirected to login for all protected views
 
     PROTECTED_URLS = [
         "/logs/",
@@ -277,7 +275,7 @@ class AuthRedirectTest(TestCase):
 
 
 class LoggedInViewTest(TestCase):
-    """Logged-in users should get 200 OK on all main views."""
+    # Logged-in users should get 200 OK on all main views
 
     def setUp(self):
         self.user = User.objects.create_user(username="viewuser", password="pass")
@@ -325,10 +323,8 @@ class LoggedInViewTest(TestCase):
 # ──────────────────────────────────────────────────────────────
 
 class TomorrowPlanZoneTest(TestCase):
-    """
-    Tests the zone-selection logic of tomorrow_view by creating realistic
-    log data and checking what zone the view assigns in its context.
-    """
+    # Tests the zone-selection logic of tomorrow_view by creating realistic
+    # log data and checking what zone the view assigns in its context
 
     def setUp(self):
         self.user = User.objects.create_user(username="planuser", password="pass")
@@ -362,12 +358,12 @@ class TomorrowPlanZoneTest(TestCase):
         return response.context["zone"]
 
     def test_rest_day_triggered_by_low_sleep(self):
-        """Anchor day with < 2 hours sleep → REST zone."""
+        # Anchor day with < 2 hours sleep → REST zone
         self._create_log(days_ago=0, sleep_hours=1.5)
         self.assertEqual(self._get_zone(), "REST")
 
     def test_rest_day_triggered_by_very_high_rpe(self):
-        """120+ minutes at RPE 9+ on anchor day → REST zone."""
+        # 120+ minutes at RPE 9+ on anchor day → REST zone
         self._create_log(
             days_ago=0,
             activities=[
@@ -377,7 +373,7 @@ class TomorrowPlanZoneTest(TestCase):
         self.assertEqual(self._get_zone(), "REST")
 
     def test_recovery_zone_after_hard_effort(self):
-        """Avg RPE ≥ 8 on anchor day → RECOVERY zone (no rest triggers)."""
+        # Avg RPE >= 8 on anchor day → RECOVERY zone (no rest triggers)
         self._create_log(
             days_ago=0,
             sleep_hours=7,
@@ -388,13 +384,13 @@ class TomorrowPlanZoneTest(TestCase):
         self.assertEqual(self._get_zone(), "RECOVERY")
 
     def test_easy_zone_from_bad_sleep(self):
-        """7-day avg sleep < 6 hours → EASY zone (no harder triggers)."""
+        # 7-day avg sleep < 6 hours → EASY zone (no harder triggers)
         for i in range(7):
             self._create_log(days_ago=i, sleep_hours=5, sleep_quality=4, wellness=6, stress=4)
         self.assertEqual(self._get_zone(), "EASY")
 
     def test_hard_zone_conditions(self):
-        """Good 7-day sleep (>7.5h, quality >7) + yesterday low RPE (≤4) → HARD zone."""
+        # Good 7-day sleep (>7.5h, quality >7) + yesterday low RPE (<=4) → HARD zone
         for i in range(7):
             self._create_log(
                 days_ago=i,
@@ -407,11 +403,11 @@ class TomorrowPlanZoneTest(TestCase):
         self.assertEqual(self._get_zone(), "HARD")
 
     def test_no_data_defaults_to_moderate(self):
-        """No logs at all → MODERATE (default fallback)."""
+        # No logs at all → MODERATE (default fallback)
         self.assertEqual(self._get_zone(), "MODERATE")
 
     def test_three_suggestions_returned(self):
-        """With activity history, tomorrow view returns exactly 3 suggestion cards."""
+        # With activity history, tomorrow view returns exactly 3 suggestion cards
         for i in range(7):
             self._create_log(
                 days_ago=i,
@@ -425,7 +421,7 @@ class TomorrowPlanZoneTest(TestCase):
         self.assertEqual(len(response.context["suggestions"]), 3)
 
     def test_duplicate_date_log_rejected(self):
-        """Creating two logs for the same date should fail."""
+        # Creating two logs for the same date should fail
         self._create_log(days_ago=0)
         with self.assertRaises(Exception):
             self._create_log(days_ago=0)
