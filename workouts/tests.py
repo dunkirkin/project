@@ -9,7 +9,7 @@ from django.urls import reverse
 from .models import Activity, DailyLog
 from .views import ACTIVITY_DURATION_MULT, _scale_duration
 
-# Test cases
+# Test cases for the models and the correct algorihtim scores
 
 
 class SleepScoreTest(TestCase):
@@ -173,9 +173,7 @@ class DurationScalingTest(TestCase):
         self.assertEqual(high, 80)
 
 
-# ──────────────────────────────────────────────────────────────
-#  FORM TESTS
-# ──────────────────────────────────────────────────────────────
+#Tests for the forms
 
 class DailyLogFormTest(TestCase):
     # Tests that DailyLogForm validates input correctly
@@ -245,9 +243,7 @@ class ActivityFormTest(TestCase):
         self.assertFalse(form.is_valid())
 
 
-# ──────────────────────────────────────────────────────────────
-#  VIEW TESTS (authentication + status codes)
-# ──────────────────────────────────────────────────────────────
+#Tests for all the views and html templates
 
 class AuthRedirectTest(TestCase):
     # Unauthenticated users should be redirected to login for all protected views
@@ -318,9 +314,7 @@ class LoggedInViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
 
-# ──────────────────────────────────────────────────────────────
-#  TOMORROW'S PLAN ALGORITHM TESTS
-# ──────────────────────────────────────────────────────────────
+#Tests for the tmrws plan algo
 
 class TomorrowPlanZoneTest(TestCase):
     # Tests the zone-selection logic of tomorrow_view by creating realistic
