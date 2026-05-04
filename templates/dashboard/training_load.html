@@ -11,7 +11,8 @@
     margin-bottom: 20px;
   }
   .back-link {
-    display: inline-block;
+    display: block;
+    margin-top: 8px;
     color: rgba(255,255,255,0.8);
     text-decoration: none;
     font-size: 14px;
@@ -160,9 +161,6 @@
 <div class="detail-header">
   <h1 style="color:white; margin:0;">Training Load</h1>
 </div>
-<p style="color:rgba(255,255,255,0.75); margin-top:4px; font-size:13px;">
-  {{ seven_days_ago|date:"M j" }} – {{ today|date:"M j, Y" }}
-</p>
 <a class="back-link" href="{% url 'dashboard' %}">← Back to Dashboard</a>
 
 <!-- ── Current week summary ── -->
