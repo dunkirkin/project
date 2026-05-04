@@ -110,6 +110,16 @@
     fill: #1b1b1b;
     text-anchor: middle;
   }
+  .y-axis-label {
+    font-size: 9px;
+    fill: #111;
+    text-anchor: end;
+  }
+  .y-axis-grid {
+    stroke: rgba(0,0,0,0.12);
+    stroke-width: 0.5;
+    stroke-dasharray: 2 2;
+  }
 
   /* ── Best/worst nights ── */
   .night-grid {
@@ -141,9 +151,6 @@
 <div class="detail-header">
   <h1 style="color:white; margin:0;">Sleep Score</h1>
 </div>
-<p style="color:rgba(255,255,255,0.75); margin-top:4px; font-size:13px;">
-  7-day score | 30-day trends
-</p>
 <a class="back-link" href="{% url 'dashboard' %}">← Back to Dashboard</a>
 
 <!-- ── Gauge + 7-day stats ── -->
@@ -228,6 +235,10 @@
   </div>
   <div class="chart-wrap">
     <svg viewBox="0 0 560 120" width="100%" height="120" role="img" aria-label="30-day sleep hours chart">
+      {% for tick in hours_ticks %}
+        <line class="y-axis-grid" x1="28" y1="{{ tick.y }}" x2="548" y2="{{ tick.y }}"></line>
+        <text class="y-axis-label" x="24" y="{{ tick.y }}" dominant-baseline="middle">{{ tick.label }}</text>
+      {% endfor %}
       <polyline class="sleep-line" points="{{ hours_line }}"></polyline>
       {% for item in hours_chart %}
         <circle class="chart-point-blue" cx="{{ item.x }}" cy="{{ item.y }}" r="3"></circle>
@@ -251,6 +262,10 @@
   </div>
   <div class="chart-wrap">
     <svg viewBox="0 0 560 120" width="100%" height="120" role="img" aria-label="30-day sleep quality chart">
+      {% for tick in quality_ticks %}
+        <line class="y-axis-grid" x1="28" y1="{{ tick.y }}" x2="548" y2="{{ tick.y }}"></line>
+        <text class="y-axis-label" x="24" y="{{ tick.y }}" dominant-baseline="middle">{{ tick.label }}</text>
+      {% endfor %}
       <polyline class="quality-line" points="{{ quality_line }}"></polyline>
       {% for item in quality_chart %}
         <circle class="chart-point-purple" cx="{{ item.x }}" cy="{{ item.y }}" r="3"></circle>

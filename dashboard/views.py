@@ -4,22 +4,57 @@ from workouts.models import Activity, DailyLog
 from django.db.models import Sum, Count, F, ExpressionWrapper, FloatField
 from django.utils import timezone
 from datetime import timedelta
+import math
+
+
+# ─────────────────────────────────────────────
+#  Helper: round up to a "nice" axis max
+# ─────────────────────────────────────────────
+def _nice_max(val):
+    if val <= 0:
+        return 1
+    nice_options = [1, 2, 3, 5, 8, 10, 12, 15, 20, 25, 30, 50, 75, 100]
+    for opt in nice_options:
+        if val <= opt:
+            return opt
+    return math.ceil(val / 50) * 50
+
+
+# ─────────────────────────────────────────────
+#  Helper: build Y-axis tick marks for a chart
+# ─────────────────────────────────────────────
+def _y_ticks(max_val, num_ticks=4, chart_height=120, pad_top=10, pad_bottom=28):
+    plot_height = chart_height - pad_top - pad_bottom
+    ticks = []
+    for i in range(num_ticks + 1):
+        value = max_val * i / num_ticks
+        y = pad_top + ((max_val - value) / max_val) * plot_height
+        if max_val <= 12:
+            display = round(value, 1)
+            if display == int(display):
+                display = int(display)
+        else:
+            display = round(value)
+        ticks.append({"y": round(y, 1), "label": display})
+    return ticks
 
 
 # ─────────────────────────────────────────────
 #  Helper: compute SVG polyline points
 # ─────────────────────────────────────────────
 def _svg_points(data_list, value_key, chart_width=420, chart_height=140,
-                pad_left=24, pad_right=12, pad_top=10, pad_bottom=30):
+                pad_left=24, pad_right=12, pad_top=10, pad_bottom=30, max_val=None):
     """
     Given a list of dicts each with a numeric value at `value_key`,
     compute SVG x/y coordinates and add them to each dict in place.
     Returns the 'points' string for <polyline>.
+    Pass max_val to lock the y-axis scale (so chart points line up with axis ticks).
     """
     plot_width = chart_width - pad_left - pad_right
     plot_height = chart_height - pad_top - pad_bottom
     count = len(data_list)
-    max_val = max((item[value_key] for item in data_list), default=1) or 1
+    if max_val is None:
+        max_val = max((item[value_key] for item in data_list), default=1) or 1
 
     for idx, item in enumerate(data_list):
         x = pad_left + (plot_width * idx / max(count - 1, 1))
@@ -381,10 +416,19 @@ def sleep_score_view(request):
             "sleep_quality": log.sleep_quality if log and log.sleep_quality else 0,
         })
 
+    raw_hours_max = max((item["sleep_hours"] for item in hours_chart), default=1) or 1
+    hours_axis_max = _nice_max(raw_hours_max)
     hours_line = _svg_points(hours_chart, "sleep_hours", chart_width=560, chart_height=120,
-                              pad_left=28, pad_right=12, pad_top=10, pad_bottom=28)
+                              pad_left=28, pad_right=12, pad_top=10, pad_bottom=28,
+                              max_val=hours_axis_max)
+    hours_ticks = _y_ticks(hours_axis_max, num_ticks=4, chart_height=120, pad_top=10, pad_bottom=28)
+
+    raw_quality_max = max((float(item["sleep_quality"]) for item in quality_chart), default=1) or 1
+    quality_axis_max = _nice_max(raw_quality_max)
     quality_line = _svg_points(quality_chart, "sleep_quality", chart_width=560, chart_height=120,
-                                pad_left=28, pad_right=12, pad_top=10, pad_bottom=28)
+                                pad_left=28, pad_right=12, pad_top=10, pad_bottom=28,
+                                max_val=quality_axis_max)
+    quality_ticks = _y_ticks(quality_axis_max, num_ticks=4, chart_height=120, pad_top=10, pad_bottom=28)
 
     # ── 30-day averages — only days with data ──
     sleep_logs_30 = logs_30.exclude(sleep_hours__isnull=True)
@@ -411,6 +455,8 @@ def sleep_score_view(request):
         "quality_chart": quality_chart,
         "hours_line": hours_line,
         "quality_line": quality_line,
+        "hours_ticks": hours_ticks,
+        "quality_ticks": quality_ticks,
         "avg_sleep_30": avg_sleep_30,
         "avg_quality_30": avg_quality_30,
     }
@@ -472,8 +518,12 @@ def wellness_stress_view(request):
             "has_log": has_log,
         })
 
+    raw_recovery_max = max((item["recovery_score"] for item in recovery_chart), default=1) or 1
+    recovery_axis_max = _nice_max(raw_recovery_max)
     recovery_line = _svg_points(recovery_chart, "recovery_score", chart_width=560, chart_height=120,
-                                 pad_left=28, pad_right=12, pad_top=10, pad_bottom=28)
+                                 pad_left=28, pad_right=12, pad_top=10, pad_bottom=28,
+                                 max_val=recovery_axis_max)
+    recovery_ticks = _y_ticks(recovery_axis_max, num_ticks=4, chart_height=120, pad_top=10, pad_bottom=28)
 
     # ── 30-day averages — only days with actual logs ──
     wellness_logs_30 = logs_30.exclude(wellness__isnull=True)
@@ -498,6 +548,7 @@ def wellness_stress_view(request):
         "avg_stress_7": avg_stress_7,
         "recovery_chart": recovery_chart,
         "recovery_line": recovery_line,
+        "recovery_ticks": recovery_ticks,
         "avg_wellness_30": avg_wellness_30,
         "avg_stress_30": avg_stress_30,
         "avg_recovery_30": avg_recovery_30,
