@@ -95,7 +95,7 @@ class Activity(models.Model):
         max_digits=3, decimal_places=1, null=True, blank=True,
         validators=[MinValueValidator(0), MaxValueValidator(10)]
     )
-    distance = models.FloatField(null=True, blank=True)
+    distance = models.FloatField(null=True, blank=True, validators=[MinValueValidator(0)])
     distance_unit = models.CharField(max_length=10, choices=DISTANCE_UNITS, default="Miles", null=True, blank=True)
     
     notes = models.TextField(blank=True) # user can make notes for themselves for each workout
