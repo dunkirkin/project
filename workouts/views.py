@@ -106,7 +106,22 @@ def history_view(request):
     # Personal bests are always all-time, never filtered
     all_acts = Activity.objects.filter(daily_log__user=request.user).select_related("daily_log")
     best_duration = all_acts.order_by("-duration_min").first()
-    best_distance = all_acts.filter(distance__isnull=False, distance__gt=0).order_by("-distance").first()
+
+    # Convert all distances to miles before comparing so units are normalized
+    # (e.g. 5 miles is farther than 1400 yards even though 1400 > 5).
+    distance_to_miles = {
+        "Miles":      1.0,
+        "Kilometers": 0.621371,
+        "Meters":     0.000621371,
+        "Yards":      0.000568182,
+    }
+    distance_acts = all_acts.filter(distance__isnull=False, distance__gt=0)
+    best_distance = max(
+        distance_acts,
+        key=lambda a: a.distance * distance_to_miles.get(a.distance_unit, 1.0),
+        default=None,
+    )
+
     best_rpe = all_acts.filter(rpe__isnull=False).order_by("-rpe").first()
     best_feeling = all_acts.filter(post_workout_feeling__isnull=False).order_by("-post_workout_feeling", "-duration_min").first()
 
