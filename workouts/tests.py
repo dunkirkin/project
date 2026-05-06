@@ -419,3 +419,558 @@ class TomorrowPlanZoneTest(TestCase):
         self._create_log(days_ago=0)
         with self.assertRaises(Exception):
             self._create_log(days_ago=0)
+
+
+# Tests for POST functionality in log and activity views
+
+class LogCreatePostTest(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="postcreateuser", password="pass")
+        self.client.login(username="postcreateuser", password="pass")
+
+    def test_valid_post_creates_log_and_redirects(self):
+        response = self.client.post(reverse("log_create"), {
+            "date": str(date.today()),
+            "sleep_hours": "7.5",
+            "sleep_quality": "8",
+            "wellness": "7",
+            "stress": "3",
+            "notes": "",
+        })
+        self.assertRedirects(response, reverse("logs"))
+        self.assertTrue(DailyLog.objects.filter(user=self.user, date=date.today()).exists())
+
+    def test_duplicate_date_post_shows_form_error(self):
+        DailyLog.objects.create(user=self.user, date=date.today())
+        response = self.client.post(reverse("log_create"), {
+            "date": str(date.today()),
+            "sleep_hours": "7",
+            "sleep_quality": "7",
+            "wellness": "7",
+            "stress": "3",
+            "notes": "",
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("date", response.context["form"].errors)
+
+    def test_invalid_post_stays_on_form(self):
+        response = self.client.post(reverse("log_create"), {"date": "", "sleep_hours": "7"})
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(DailyLog.objects.filter(user=self.user).exists())
+
+
+class LogDeleteTest(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="deleteuser", password="pass")
+        self.other = User.objects.create_user(username="otheruserD", password="pass")
+        self.client.login(username="deleteuser", password="pass")
+        self.log = DailyLog.objects.create(user=self.user, date=date.today())
+
+    def test_get_renders_confirmation_page(self):
+        response = self.client.get(reverse("log_delete", args=[self.log.id]))
+        self.assertEqual(response.status_code, 200)
+
+    def test_post_deletes_log_and_redirects(self):
+        response = self.client.post(reverse("log_delete", args=[self.log.id]))
+        self.assertRedirects(response, reverse("logs"))
+        self.assertFalse(DailyLog.objects.filter(id=self.log.id).exists())
+
+    def test_cannot_delete_other_users_log(self):
+        other_log = DailyLog.objects.create(user=self.other, date=date.today())
+        response = self.client.post(reverse("log_delete", args=[other_log.id]))
+        self.assertEqual(response.status_code, 404)
+        self.assertTrue(DailyLog.objects.filter(id=other_log.id).exists())
+
+
+class ActivityAddTest(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="actadduser", password="pass")
+        self.other = User.objects.create_user(username="otheruserA", password="pass")
+        self.client.login(username="actadduser", password="pass")
+        self.log = DailyLog.objects.create(user=self.user, date=date.today())
+        self.other_log = DailyLog.objects.create(user=self.other, date=date.today())
+
+    def test_get_renders_form(self):
+        response = self.client.get(reverse("activity_add", args=[self.log.id]))
+        self.assertEqual(response.status_code, 200)
+
+    def test_valid_post_creates_activity_and_redirects(self):
+        response = self.client.post(reverse("activity_add", args=[self.log.id]), {
+            "name_of_activity": "Afternoon Run",
+            "activity_type": "Run",
+            "duration_min": "45",
+            "rpe": "6",
+            "distance": "5",
+            "distance_unit": "Miles",
+            "notes": "",
+        })
+        self.assertRedirects(response, reverse("logs"))
+        self.assertEqual(self.log.activities.count(), 1)
+
+    def test_invalid_post_stays_on_form(self):
+        response = self.client.post(reverse("activity_add", args=[self.log.id]), {
+            "activity_type": "",
+            "duration_min": "45",
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.log.activities.count(), 0)
+
+    def test_cannot_add_activity_to_other_users_log(self):
+        response = self.client.get(reverse("activity_add", args=[self.other_log.id]))
+        self.assertEqual(response.status_code, 404)
+
+
+# Tests for model __str__ methods
+
+class ModelStrTest(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="struser", password="pass")
+        self.today = date.today()
+        self.log = DailyLog.objects.create(user=self.user, date=self.today)
+
+    def test_daily_log_str(self):
+        self.assertEqual(str(self.log), f"struser - {self.today}")
+
+    def test_activity_str(self):
+        act = Activity.objects.create(
+            daily_log=self.log, activity_type="Run", duration_min=45
+        )
+        self.assertEqual(str(act), f"Run (45 min) - {self.today}")
+
+
+# Additional validator edge cases
+
+class AdditionalValidatorTest(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="valuser2", password="pass")
+        self.log = DailyLog.objects.create(user=self.user, date=date.today())
+
+    def test_negative_rpe_is_invalid(self):
+        act = Activity(daily_log=self.log, activity_type="Run", duration_min=30, rpe=Decimal("-1"))
+        with self.assertRaises(ValidationError):
+            act.full_clean()
+
+    def test_negative_distance_is_invalid(self):
+        act = Activity(daily_log=self.log, activity_type="Run", duration_min=30, distance=-1.0)
+        with self.assertRaises(ValidationError):
+            act.full_clean()
+
+
+# Tests for tomorrow view context beyond zone selection
+
+class TomorrowViewContextTest(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="tmrwctxuser", password="pass")
+        self.client.login(username="tmrwctxuser", password="pass")
+        self.today = date.today()
+
+    def test_rest_zone_dur_low_and_high_are_none(self):
+        DailyLog.objects.create(user=self.user, date=self.today, sleep_hours=Decimal("1.0"))
+        response = self.client.get(reverse("tomorrow"))
+        self.assertIsNone(response.context["dur_low"])
+        self.assertIsNone(response.context["dur_high"])
+
+    def test_rest_zone_suggestions_are_walk_stretch_yoga(self):
+        DailyLog.objects.create(user=self.user, date=self.today, sleep_hours=Decimal("1.0"))
+        response = self.client.get(reverse("tomorrow"))
+        names = [s["name"] for s in response.context["suggestions"]]
+        self.assertEqual(names, ["Walk", "Stretch", "Yoga"])
+
+    def test_has_today_log_true_when_todays_log_exists(self):
+        DailyLog.objects.create(user=self.user, date=self.today)
+        response = self.client.get(reverse("tomorrow"))
+        self.assertTrue(response.context["has_today_log"])
+
+    def test_has_today_log_false_when_no_todays_log(self):
+        response = self.client.get(reverse("tomorrow"))
+        self.assertFalse(response.context["has_today_log"])
+
+    def test_no_activity_history_returns_one_generic_suggestion(self):
+        # Log exists but no activities → falls back to a single generic suggestion card
+        DailyLog.objects.create(
+            user=self.user, date=self.today,
+            sleep_hours=Decimal("8"), sleep_quality=Decimal("8"),
+            wellness=Decimal("8"), stress=Decimal("2"),
+        )
+        response = self.client.get(reverse("tomorrow"))
+        self.assertEqual(len(response.context["suggestions"]), 1)
+
+
+# Tests for history view context values
+
+class HistoryViewContextTest(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="histuser", password="pass")
+        self.client.login(username="histuser", password="pass")
+        self.today = date.today()
+
+    def test_total_count_matches_number_of_activities(self):
+        log = DailyLog.objects.create(user=self.user, date=self.today)
+        Activity.objects.create(daily_log=log, activity_type="Run", duration_min=30)
+        Activity.objects.create(daily_log=log, activity_type="Bike", duration_min=45)
+        response = self.client.get(reverse("history"))
+        self.assertEqual(response.context["total_count"], 2)
+
+    def test_first_and_last_date_are_populated(self):
+        old_date = self.today - timedelta(days=5)
+        log_old = DailyLog.objects.create(user=self.user, date=old_date)
+        log_new = DailyLog.objects.create(user=self.user, date=self.today)
+        Activity.objects.create(daily_log=log_old, activity_type="Walk", duration_min=20)
+        Activity.objects.create(daily_log=log_new, activity_type="Run", duration_min=40)
+        response = self.client.get(reverse("history"))
+        self.assertEqual(response.context["first_date"], old_date)
+        self.assertEqual(response.context["last_date"], self.today)
+
+    def test_empty_history_has_none_for_dates(self):
+        response = self.client.get(reverse("history"))
+        self.assertIsNone(response.context["first_date"])
+        self.assertIsNone(response.context["last_date"])
+
+
+# Tests for history view filtering
+
+class HistoryFilterTest(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="histfilteruser", password="pass")
+        self.client.login(username="histfilteruser", password="pass")
+        self.today = date.today()
+        log_today = DailyLog.objects.create(user=self.user, date=self.today)
+        log_old = DailyLog.objects.create(user=self.user, date=self.today - timedelta(days=60))
+        Activity.objects.create(daily_log=log_today, activity_type="Run", duration_min=30)
+        Activity.objects.create(daily_log=log_today, activity_type="Bike", duration_min=45)
+        Activity.objects.create(daily_log=log_old, activity_type="Run", duration_min=40)
+
+    def test_type_filter_returns_only_matching_type(self):
+        response = self.client.get(reverse("history") + "?type=Bike")
+        self.assertEqual(response.context["total_count"], 1)
+
+    def test_period_filter_excludes_old_activities(self):
+        response = self.client.get(reverse("history") + "?period=30")
+        self.assertEqual(response.context["total_count"], 2)
+
+    def test_combined_type_and_period_filter(self):
+        response = self.client.get(reverse("history") + "?type=Run&period=30")
+        self.assertEqual(response.context["total_count"], 1)
+
+    def test_invalid_period_falls_back_to_all(self):
+        response = self.client.get(reverse("history") + "?period=notanumber")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["total_count"], 3)
+
+    def test_selected_type_and_period_passed_to_context(self):
+        response = self.client.get(reverse("history") + "?type=Run&period=7")
+        self.assertEqual(response.context["selected_type"], "Run")
+        self.assertEqual(response.context["selected_period"], "7")
+
+    def test_unmatched_filter_returns_zero_count(self):
+        response = self.client.get(reverse("history") + "?type=Swim")
+        self.assertEqual(response.context["total_count"], 0)
+
+
+# Tests for history view personal bests
+
+class HistoryPersonalBestsTest(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="bestsuser", password="pass")
+        self.client.login(username="bestsuser", password="pass")
+        self.today = date.today()
+        log = DailyLog.objects.create(user=self.user, date=self.today)
+        Activity.objects.create(
+            daily_log=log, activity_type="Run", duration_min=90,
+            rpe=Decimal("8"), distance=10.0, distance_unit="Miles",
+            post_workout_feeling=5,
+        )
+        Activity.objects.create(
+            daily_log=log, activity_type="Bike", duration_min=45,
+            rpe=Decimal("6"),
+        )
+
+    def test_best_duration_is_longest_activity(self):
+        response = self.client.get(reverse("history"))
+        self.assertEqual(response.context["best_duration"].duration_min, 90)
+
+    def test_best_distance_is_farthest_activity(self):
+        response = self.client.get(reverse("history"))
+        self.assertEqual(response.context["best_distance"].distance, 10.0)
+
+    def test_best_rpe_is_highest_effort(self):
+        response = self.client.get(reverse("history"))
+        self.assertEqual(float(response.context["best_rpe"].rpe), 8.0)
+
+    def test_best_feeling_is_highest_rating(self):
+        response = self.client.get(reverse("history"))
+        self.assertEqual(response.context["best_feeling"].post_workout_feeling, 5)
+
+    def test_best_distance_none_when_no_distance_logged(self):
+        user2 = User.objects.create_user(username="nodistuser", password="pass")
+        self.client.login(username="nodistuser", password="pass")
+        log2 = DailyLog.objects.create(user=user2, date=self.today)
+        Activity.objects.create(daily_log=log2, activity_type="Lift", duration_min=60)
+        response = self.client.get(reverse("history"))
+        self.assertIsNone(response.context["best_distance"])
+
+    def test_personal_bests_unaffected_by_type_filter(self):
+        # Filter to Bike (45 min) but best_duration should still be 90 (all-time)
+        response = self.client.get(reverse("history") + "?type=Bike")
+        self.assertEqual(response.context["best_duration"].duration_min, 90)
+
+
+# Tests for post_workout_feeling field
+
+class PostWorkoutFeelingTest(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="feelinguser", password="pass")
+        self.log = DailyLog.objects.create(user=self.user, date=date.today())
+
+    def test_valid_feeling_values_1_to_5_accepted(self):
+        for val in range(1, 6):
+            act = Activity(daily_log=self.log, activity_type="Run", duration_min=30,
+                           name_of_activity="Morning Run", post_workout_feeling=val)
+            try:
+                act.full_clean()
+            except ValidationError:
+                self.fail(f"post_workout_feeling={val} should be valid")
+
+    def test_feeling_above_5_is_invalid(self):
+        act = Activity(daily_log=self.log, activity_type="Run", duration_min=30,
+                       name_of_activity="Morning Run", post_workout_feeling=6)
+        with self.assertRaises(ValidationError):
+            act.full_clean()
+
+    def test_feeling_below_1_is_invalid(self):
+        act = Activity(daily_log=self.log, activity_type="Run", duration_min=30,
+                       name_of_activity="Morning Run", post_workout_feeling=0)
+        with self.assertRaises(ValidationError):
+            act.full_clean()
+
+    def test_feeling_is_optional(self):
+        act = Activity(daily_log=self.log, activity_type="Run", duration_min=30,
+                       name_of_activity="Morning Run")
+        try:
+            act.full_clean()
+        except ValidationError:
+            self.fail("post_workout_feeling should be optional")
+
+    def test_feeling_display_labels(self):
+        labels = {1: "Exhausted", 2: "Tired", 3: "Okay", 4: "Good", 5: "Great"}
+        for val, expected in labels.items():
+            act = Activity.objects.create(
+                daily_log=self.log, activity_type="Run", duration_min=30,
+                post_workout_feeling=val,
+            )
+            self.assertEqual(act.get_post_workout_feeling_display(), expected)
+            act.delete()
+
+
+# Tests for composite RPE (feeling adjusts zone selection)
+
+class CompositeRpeZoneTest(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="comprpeuser", password="pass")
+        self.client.login(username="comprpeuser", password="pass")
+        self.today = date.today()
+
+    def test_bad_feeling_after_moderate_rpe_triggers_recovery(self):
+        # RPE 7 + feeling=1 (Exhausted, adj=+2) → composite 9 ≥ 8 → RECOVERY
+        log = DailyLog.objects.create(user=self.user, date=self.today,
+                                      sleep_hours=Decimal("7"))
+        Activity.objects.create(
+            daily_log=log, activity_type="Run", name_of_activity="Run",
+            duration_min=45, rpe=Decimal("7"), post_workout_feeling=1,
+        )
+        response = self.client.get(reverse("tomorrow"))
+        self.assertEqual(response.context["zone"], "RECOVERY")
+
+    def test_great_feeling_after_hard_rpe_avoids_recovery(self):
+        # RPE 8 + feeling=5 (Great, adj=-2) → composite 6 < 8 → not RECOVERY
+        log = DailyLog.objects.create(user=self.user, date=self.today,
+                                      sleep_hours=Decimal("7"))
+        Activity.objects.create(
+            daily_log=log, activity_type="Run", name_of_activity="Run",
+            duration_min=45, rpe=Decimal("8"), post_workout_feeling=5,
+        )
+        zone = self.client.get(reverse("tomorrow")).context["zone"]
+        self.assertNotEqual(zone, "RECOVERY")
+
+    def test_reason_always_present_in_context(self):
+        response = self.client.get(reverse("tomorrow"))
+        self.assertIn("reason", response.context)
+        self.assertIsInstance(response.context["reason"], str)
+        self.assertGreater(len(response.context["reason"]), 0)
+
+
+# Tests for DailyLog.grand_total and workout_recommendation
+
+class GrandTotalTest(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="gtuser", password="pass")
+        self.today = date.today()
+
+    def _make_log(self, sleep_hours, sleep_quality, wellness, stress):
+        return DailyLog(
+            user=self.user, date=self.today,
+            sleep_hours=sleep_hours, sleep_quality=sleep_quality,
+            wellness=wellness, stress=stress,
+        )
+
+    def test_grand_total_perfect_recovery(self):
+        # sleep_score=100 → 100/5=20, wellness=10, stress=0 → total=30
+        log = self._make_log(9, 10, 10, 0)
+        self.assertAlmostEqual(log.grand_total, 30.0, places=1)
+
+    def test_grand_total_no_sleep_data(self):
+        # sleep_score=None → 0/5=0, wellness=2, stress=8 → total=-6
+        log = self._make_log(None, None, 2, 8)
+        self.assertAlmostEqual(log.grand_total, -6.0, places=1)
+
+    def test_workout_recommendation_rest_day(self):
+        log = self._make_log(None, None, 2, 8)  # grand_total = -6 ≤ 5
+        self.assertEqual(log.workout_recommendation, "Take a rest day or very light activity.")
+
+    def test_workout_recommendation_hard_workout_ok(self):
+        log = self._make_log(9, 10, 10, 0)  # grand_total = 30 > 25
+        self.assertEqual(log.workout_recommendation, "You are recovered. Hard workout is okay.")
+
+
+# Tests for log edit, activity edit, and activity delete views
+
+class LogEditTest(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="logedituser", password="pass")
+        self.other = User.objects.create_user(username="logeditother", password="pass")
+        self.log = DailyLog.objects.create(user=self.user, date=date.today(), sleep_hours=7)
+        self.client.login(username="logedituser", password="pass")
+        self.url = reverse("log_edit", args=[self.log.id])
+
+    def test_get_renders_form_with_existing_values(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Edit Log")
+        self.assertEqual(response.context["form"].instance, self.log)
+
+    def test_valid_post_saves_and_redirects(self):
+        new_date = date.today() - timedelta(days=1)
+        response = self.client.post(self.url, {
+            "date": new_date.isoformat(),
+            "sleep_hours": "8",
+            "sleep_quality": "9",
+            "wellness": "8",
+            "stress": "2",
+            "notes": "updated",
+        })
+        self.assertRedirects(response, reverse("logs"), fetch_redirect_response=False)
+        self.log.refresh_from_db()
+        self.assertEqual(self.log.sleep_hours, 8)
+
+    def test_cannot_edit_other_users_log(self):
+        self.client.login(username="logeditother", password="pass")
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 404)
+
+    def test_login_required(self):
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+
+
+class ActivityEditTest(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="actedituser", password="pass")
+        self.other = User.objects.create_user(username="acteditother", password="pass")
+        self.log = DailyLog.objects.create(user=self.user, date=date.today())
+        self.activity = Activity.objects.create(
+            daily_log=self.log, activity_type="Run",
+            name_of_activity="Morning Run", duration_min=30, rpe=6,
+        )
+        self.client.login(username="actedituser", password="pass")
+        self.url = reverse("activity_edit", args=[self.activity.id])
+
+    def test_get_renders_form_with_existing_values(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Edit Activity")
+        self.assertEqual(response.context["form"].instance, self.activity)
+
+    def test_valid_post_updates_activity_and_redirects(self):
+        response = self.client.post(self.url, {
+            "name_of_activity": "Evening Run",
+            "activity_type": "Run",
+            "duration_min": "45",
+            "rpe": "7",
+            "distance_unit": "Miles",
+        })
+        self.assertRedirects(response, reverse("logs"), fetch_redirect_response=False)
+        self.activity.refresh_from_db()
+        self.assertEqual(self.activity.name_of_activity, "Evening Run")
+        self.assertEqual(self.activity.duration_min, 45)
+
+    def test_invalid_post_stays_on_form(self):
+        response = self.client.post(self.url, {
+            "name_of_activity": "Run",
+            "activity_type": "",  # missing required field
+            "duration_min": "30",
+            "distance_unit": "Miles",
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Edit Activity")
+
+    def test_cannot_edit_other_users_activity(self):
+        self.client.login(username="acteditother", password="pass")
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 404)
+
+    def test_login_required(self):
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+
+
+class ActivityDeleteTest(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="actdeluser", password="pass")
+        self.other = User.objects.create_user(username="actdelother", password="pass")
+        self.log = DailyLog.objects.create(user=self.user, date=date.today())
+        self.activity = Activity.objects.create(
+            daily_log=self.log, activity_type="Run",
+            name_of_activity="Morning Run", duration_min=30,
+        )
+        self.client.login(username="actdeluser", password="pass")
+        self.url = reverse("activity_delete", args=[self.activity.id])
+
+    def test_get_renders_confirm_page(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Delete Activity")
+        self.assertContains(response, "Morning Run")
+
+    def test_post_deletes_activity_and_redirects(self):
+        response = self.client.post(self.url)
+        self.assertRedirects(response, reverse("logs"), fetch_redirect_response=False)
+        self.assertFalse(Activity.objects.filter(id=self.activity.id).exists())
+
+    def test_cannot_delete_other_users_activity(self):
+        self.client.login(username="actdelother", password="pass")
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, 404)
+        self.assertTrue(Activity.objects.filter(id=self.activity.id).exists())
+
+    def test_login_required(self):
+        self.client.logout()
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(Activity.objects.filter(id=self.activity.id).exists())

@@ -22,8 +22,15 @@
   }
 
   .form-container h2 {
-    margin-bottom: 25px;
+    margin-bottom: 4px;
     text-align: center;
+  }
+
+  .form-container .edit-subtitle {
+    text-align: center;
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 22px;
   }
 
   .form-group {
@@ -53,7 +60,6 @@
     min-height: 80px;
   }
 
-  /* ── Button grid for 1–10 scales ── */
   .scale-row {
     display: flex;
     gap: 4px;
@@ -71,16 +77,8 @@
     transition: background 0.1s, border-color 0.1s, color 0.1s;
   }
 
-  .scale-btn:hover {
-    border-color: #999;
-    background: #f0f0f0;
-  }
-
-  .scale-btn.active {
-    background: #111;
-    color: white;
-    border-color: #111;
-  }
+  .scale-btn:hover { border-color: #999; background: #f0f0f0; }
+  .scale-btn.active { background: #111; color: white; border-color: #111; }
 
   .scale-hint {
     display: flex;
@@ -108,9 +106,7 @@
     font-size: 15px;
   }
 
-  .submit-btn:hover {
-    opacity: 0.85;
-  }
+  .submit-btn:hover { opacity: 0.85; }
 
   .brand {
     position: absolute;
@@ -132,7 +128,8 @@
 <div class="brand">Athletic Insight</div>
 
 <div class="form-container">
-  <h2>New Daily Log</h2>
+  <h2>Edit Log</h2>
+  <p class="edit-subtitle">{{ log.date|date:"F j, Y" }}</p>
 
   <form method="post" id="log-form">
     {% csrf_token %}
@@ -188,10 +185,10 @@
       {{ form.notes }}
     </div>
 
-    <button type="submit" class="submit-btn">Save Log</button>
+    <button type="submit" class="submit-btn">Save Changes</button>
   </form>
 
-  <a href="/logs/" class="back-link">Back to logs</a>
+  <a href="{% url 'logs' %}" class="back-link">Cancel</a>
 </div>
 
 <script>

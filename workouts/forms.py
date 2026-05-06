@@ -21,7 +21,8 @@ class ActivityForm(forms.ModelForm):
             'distance',
             'distance_unit',
             'rpe',
-            'notes'
+            'post_workout_feeling',
+            'notes',
         ]
         widgets = {
             "name_of_activity": forms.TextInput(attrs={"class": "medium-input"}),

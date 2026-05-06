@@ -22,8 +22,15 @@
   }
 
   .form-container h2 {
-    margin-bottom: 25px;
+    margin-bottom: 4px;
     text-align: center;
+  }
+
+  .form-container .edit-subtitle {
+    text-align: center;
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 22px;
   }
 
   .form-group {
@@ -53,7 +60,6 @@
     min-height: 80px;
   }
 
-  /* ── Activity type grid (2 columns) ── */
   .type-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -72,18 +78,9 @@
     text-align: center;
   }
 
-  .type-btn:hover {
-    border-color: #999;
-    background: #f0f0f0;
-  }
+  .type-btn:hover { border-color: #999; background: #f0f0f0; }
+  .type-btn.active { background: #111; color: white; border-color: #111; }
 
-  .type-btn.active {
-    background: #111;
-    color: white;
-    border-color: #111;
-  }
-
-  /* ── RPE / scale row (0–10) ── */
   .scale-row {
     display: flex;
     gap: 4px;
@@ -101,16 +98,8 @@
     transition: background 0.1s, border-color 0.1s, color 0.1s;
   }
 
-  .scale-btn:hover {
-    border-color: #999;
-    background: #f0f0f0;
-  }
-
-  .scale-btn.active {
-    background: #111;
-    color: white;
-    border-color: #111;
-  }
+  .scale-btn:hover { border-color: #999; background: #f0f0f0; }
+  .scale-btn.active { background: #111; color: white; border-color: #111; }
 
   .scale-hint {
     display: flex;
@@ -120,7 +109,6 @@
     margin-top: 4px;
   }
 
-  /* ── Post-workout feeling row ── */
   .feeling-row {
     display: flex;
     gap: 6px;
@@ -139,18 +127,9 @@
     text-align: center;
   }
 
-  .feeling-btn:hover {
-    border-color: #999;
-    background: #f0f0f0;
-  }
+  .feeling-btn:hover { border-color: #999; background: #f0f0f0; }
+  .feeling-btn.active { background: #111; color: white; border-color: #111; }
 
-  .feeling-btn.active {
-    background: #111;
-    color: white;
-    border-color: #111;
-  }
-
-  /* ── Distance unit row ── */
   .unit-row {
     display: flex;
     gap: 6px;
@@ -168,16 +147,8 @@
     transition: background 0.1s, border-color 0.1s, color 0.1s;
   }
 
-  .unit-btn:hover {
-    border-color: #999;
-    background: #f0f0f0;
-  }
-
-  .unit-btn.active {
-    background: #111;
-    color: white;
-    border-color: #111;
-  }
+  .unit-btn:hover { border-color: #999; background: #f0f0f0; }
+  .unit-btn.active { background: #111; color: white; border-color: #111; }
 
   .field-error {
     color: red;
@@ -197,9 +168,7 @@
     font-size: 15px;
   }
 
-  .submit-btn:hover {
-    opacity: 0.85;
-  }
+  .submit-btn:hover { opacity: 0.85; }
 
   .brand {
     position: absolute;
@@ -221,7 +190,8 @@
 <div class="brand">Athletic Insight</div>
 
 <div class="form-container">
-  <h2>Add Activity</h2>
+  <h2>Edit Activity</h2>
+  <p class="edit-subtitle">{{ activity.daily_log.date|date:"F j, Y" }}</p>
 
   <form method="post">
     {% csrf_token %}
@@ -313,10 +283,10 @@
       {{ form.notes }}
     </div>
 
-    <button type="submit" class="submit-btn">Save Activity</button>
+    <button type="submit" class="submit-btn">Save Changes</button>
   </form>
 
-  <a href="/logs/" class="back-link">Back to logs</a>
+  <a href="{% url 'logs' %}" class="back-link">Cancel</a>
 </div>
 
 <script>

@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python manage.py test workouts accounts dashboard --verbosity=2)",
+      "Bash(python manage.py test workouts accounts dashboard --verbosity=1)",
+      "Bash(python manage.py test workouts.tests.LogCreatePostTest workouts.tests.DailyLogFormTest --verbosity=2)",
+      "Bash(python manage.py test workouts.tests.ActivityAddTest workouts.tests.ActivityFormTest --verbosity=2)",
+      "Bash(python manage.py makemigrations workouts --name add_post_workout_feeling)",
+      "Bash(python manage.py check)",
+      "Bash(python manage.py test workouts.tests.PostWorkoutFeelingTest --verbosity=2)"
+    ]
+  }
+}

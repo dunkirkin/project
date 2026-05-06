@@ -31,7 +31,7 @@
     margin-bottom: 28px;
   }
 
-  .confirm-card .date-highlight {
+  .confirm-card .name-highlight {
     font-weight: 700;
     color: #111;
   }
@@ -71,11 +71,11 @@
 </style>
 
 <div class="confirm-card">
-  <h2>Delete Log</h2>
+  <h2>Delete Activity</h2>
   <p>
-    Are you sure you want to delete the log for
-    <span class="date-highlight">{{ log.date|date:"F j, Y" }}</span>?
-    This will also remove all activities logged that day.
+    Are you sure you want to delete
+    <span class="name-highlight">{{ activity.name_of_activity|default:activity.activity_type }}</span>
+    from <span class="name-highlight">{{ activity.daily_log.date|date:"F j, Y" }}</span>?
   </p>
 
   <div class="btn-row">

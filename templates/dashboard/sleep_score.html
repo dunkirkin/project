@@ -93,33 +93,35 @@
   .sleep-line {
     fill: none;
     stroke: #0b6cff;
-    stroke-width: 2.5;
+    stroke-width: 3;
     stroke-linecap: round;
     stroke-linejoin: round;
   }
   .quality-line {
     fill: none;
     stroke: #9c27b0;
-    stroke-width: 2.5;
+    stroke-width: 3;
     stroke-linecap: round;
     stroke-linejoin: round;
   }
   .chart-point-blue { fill: #0b6cff; }
   .chart-point-purple { fill: #9c27b0; }
   .chart-label {
-    font-size: 10px;
+    font-size: 11px;
     fill: #1b1b1b;
     text-anchor: middle;
+    font-weight: 600;
   }
   .y-axis-label {
-    font-size: 9px;
+    font-size: 11px;
     fill: #111;
     text-anchor: end;
+    font-weight: 600;
   }
   .y-axis-grid {
-    stroke: rgba(0,0,0,0.12);
-    stroke-width: 0.5;
-    stroke-dasharray: 2 2;
+    stroke: rgba(0,0,0,0.15);
+    stroke-width: 1;
+    stroke-dasharray: 3 3;
   }
 
   /* ── Best/worst nights ── */
@@ -242,7 +244,7 @@
       {% endfor %}
       <polyline class="sleep-line" points="{{ hours_line }}"></polyline>
       {% for item in hours_chart %}
-        <circle class="chart-point-blue" cx="{{ item.x }}" cy="{{ item.y }}" r="3"></circle>
+        <circle class="chart-point-blue" cx="{{ item.x }}" cy="{{ item.y }}" r="4"></circle>
         {% if item.day_label %}
           <text class="chart-label" x="{{ item.x }}" y="{{ item.label_y }}">{{ item.day_label }}</text>
         {% endif %}
@@ -269,7 +271,7 @@
       {% endfor %}
       <polyline class="quality-line" points="{{ quality_line }}"></polyline>
       {% for item in quality_chart %}
-        <circle class="chart-point-purple" cx="{{ item.x }}" cy="{{ item.y }}" r="3"></circle>
+        <circle class="chart-point-purple" cx="{{ item.x }}" cy="{{ item.y }}" r="4"></circle>
         {% if item.day_label %}
           <text class="chart-label" x="{{ item.x }}" y="{{ item.label_y }}">{{ item.day_label }}</text>
         {% endif %}

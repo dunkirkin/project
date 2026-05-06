@@ -3,179 +3,442 @@
 
 {% block content %}
 <style>
-  .form-container {
-    background-color: rgba(255, 255, 255, 0.9);
-    padding: 40px;
-    border-radius: 10px;
-    width: 700px;
-    max-width: calc(100vw - 40px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-    margin: 0 auto;
-  }
-
-  .form-container h2 {
-    margin-bottom: 25px;
-    text-align: center;
-  }
-
-  .submit-btn {
-    margin-top: 15px;
-    width: 100%;
-    padding: 10px;
-    background-color: black;
-    color: white;
-    border: none;
+  .page-header {
+    background: rgba(1, 13, 16, 0.55);
+    padding: 6px 14px;
     border-radius: 5px;
-    cursor: pointer;
     display: inline-block;
-    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .back-link {
+    display: inline-block;
+    color: rgba(255,255,255,0.8);
     text-decoration: none;
+    font-size: 14px;
   }
+  .back-link:hover { color: white; }
 
-  .submit-btn:hover {
-    opacity: 0.85;
+  .new-log-btn {
+    display: inline-block;
+    padding: 9px 20px;
+    background: black;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
   }
+  .new-log-btn:hover { opacity: 0.85; }
 
+  /* ── Log card ── */
   .log-card {
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    padding: 16px;
-    margin: 14px 0;
+    background: rgba(255, 255, 255, 0.92);
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+    overflow: hidden;
   }
 
   .log-card-header {
+    padding: 16px 22px 12px 22px;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
     display: flex;
+    align-items: flex-start;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
+    gap: 12px;
   }
 
-  .log-card-header h3 {
-    margin: 0;
+  .log-date-block .log-weekday {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #888;
+    margin-bottom: 2px;
+  }
+  .log-date-block .log-date {
+    font-size: 22px;
+    font-weight: 700;
+    color: #111;
+    line-height: 1.2;
+  }
+  .log-date-block .log-year {
+    font-size: 13px;
+    color: #888;
+    margin-top: 1px;
   }
 
   .sleep-score-badge {
+    flex-shrink: 0;
     font-size: 13px;
-    font-weight: bold;
-    background: #eef6ff;
-    border: 1px solid #2c6cff;
-    color: #2c6cff;
-    border-radius: 6px;
-    padding: 4px 10px;
+    font-weight: 700;
+    background: #eef4ff;
+    border: 1px solid #4a90d9;
+    color: #1a56c4;
+    border-radius: 20px;
+    padding: 5px 14px;
     white-space: nowrap;
+    margin-top: 4px;
   }
 
-  .muted {
-    color: #555;
-    font-size: 14px;
-  }
-
-  .actions {
+  /* ── Stats row ── */
+  .stats-row {
     display: flex;
-    gap: 10px;
     flex-wrap: wrap;
-    margin-top: 10px;
+    gap: 8px;
+    padding: 12px 22px;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
   }
 
-  .link-btn {
-    padding: 8px 10px;
-    background: black;
-    color: white;
-    border-radius: 5px;
+  .stat-chip {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(0,0,0,0.05);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 13px;
+    color: #333;
+  }
+  .stat-chip .chip-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #888;
+    margin-right: 2px;
+  }
+  .stat-chip .chip-value {
+    font-weight: 700;
+    color: #111;
+  }
+
+  /* ── Notes ── */
+  .log-notes {
+    padding: 10px 22px;
+    font-size: 14px;
+    color: #444;
+    font-style: italic;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    line-height: 1.5;
+  }
+
+  /* ── Activities section ── */
+  .activities-section {
+    padding: 14px 22px;
+  }
+
+  .activities-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .activities-label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #888;
+  }
+  .add-activity-btn {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1a56c4;
     text-decoration: none;
-    font-size: 14px;
-  }
-
-  .link-btn:hover {
-    opacity: 0.85;
-  }
-
-  .danger-btn {
-    padding: 8px 10px;
-    background: #b00020;
-    color: white;
-    border: none;
+    padding: 4px 10px;
+    border: 1px solid #4a90d9;
     border-radius: 5px;
-    cursor: pointer;
+    background: #eef4ff;
+  }
+  .add-activity-btn:hover { background: #d8eaff; }
+
+  .activity-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .activity-card {
+    background: rgba(0,0,0,0.04);
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 8px;
+    padding: 12px 14px;
+    min-width: 150px;
+    flex: 1;
+    max-width: 220px;
+  }
+
+  .activity-card .act-type-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .act-type-badge.Run,
+  .act-type-badge.Walk,
+  .act-type-badge.Hike     { background: #90caf9; color: #0d47a1; }
+  .act-type-badge.Bike,
+  .act-type-badge[class*="Bike"] { background: #a5d6a7; color: #1b5e20; }
+  .act-type-badge.Swim     { background: #81d4fa; color: #01579b; }
+  .act-type-badge.Lift     { background: #ef9a9a; color: #b71c1c; }
+  .act-type-badge.Yoga     { background: #ce93d8; color: #4a148c; }
+  .act-type-badge.Sport    { background: #ffcc80; color: #bf360c; }
+  .act-type-badge.Other    { background: #ccc;    color: #333; }
+
+  .activity-card .act-name {
     font-size: 14px;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 6px;
+    line-height: 1.3;
   }
 
-  .danger-btn:hover {
-    opacity: 0.85;
+  .activity-card .act-meta {
+    font-size: 12px;
+    color: #555;
+    line-height: 1.8;
   }
 
-  ul {
-    margin: 8px 0 0 18px;
+  .act-meta .rpe-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 3px;
+    vertical-align: middle;
   }
+
+  .activity-card .act-feeling {
+    margin-top: 5px;
+    font-size: 11px;
+    color: #777;
+    font-style: italic;
+  }
+
+  .activity-card .act-notes {
+    margin-top: 6px;
+    font-size: 11px;
+    color: #666;
+    font-style: italic;
+    border-top: 1px solid rgba(0,0,0,0.08);
+    padding-top: 5px;
+    line-height: 1.4;
+  }
+
+  .no-activities {
+    font-size: 13px;
+    color: #aaa;
+    font-style: italic;
+  }
+
+  /* ── Footer / delete ── */
+  .log-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 8px 22px 14px 22px;
+  }
+
+  .log-actions {
+    display: flex;
+    gap: 6px;
+  }
+
+  .edit-link {
+    font-size: 12px;
+    color: #555;
+    text-decoration: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+  .edit-link:hover { color: #1a56c4; background: rgba(26,86,196,0.07); }
+
+  .delete-link {
+    font-size: 12px;
+    color: #999;
+    text-decoration: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+  .delete-link:hover { color: #b00020; background: rgba(176,0,32,0.06); }
+
+  /* ── Activity card action links ── */
+  .act-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(0,0,0,0.07);
+  }
+
+  .act-edit-link {
+    font-size: 11px;
+    color: #666;
+    text-decoration: none;
+  }
+  .act-edit-link:hover { color: #1a56c4; }
+
+  .act-delete-link {
+    font-size: 11px;
+    color: #bbb;
+    text-decoration: none;
+    margin-left: auto;
+  }
+  .act-delete-link:hover { color: #b00020; }
+
+  /* ── Empty state ── */
+  .empty-state {
+    background: rgba(255,255,255,0.92);
+    border-radius: 12px;
+    padding: 60px 20px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+  }
+  .empty-state p { font-size: 16px; color: #555; margin-bottom: 16px; }
 </style>
 
-<div class="form-container">
-  <div style="display:flex; justify-content: space-between; margin-bottom: 15px;">
-    <a href="{% url 'dashboard' %}" class="link-btn">Dashboard</a>
+<div class="page-header">
+  <h1 style="color:white; margin:0;">Your Logs</h1>
+</div>
 
-    <form method="post" action="{% url 'logout' %}" style="margin:0;">
-      {% csrf_token %}
-      <button type="submit" class="danger-btn">Logout</button>
-    </form>
-  </div>
+<div class="top-bar">
+  <a class="back-link" href="{% url 'dashboard' %}">← Dashboard</a>
+  <a class="new-log-btn" href="{% url 'log_create' %}">+ New Daily Log</a>
+</div>
 
-  <h2>Your Daily Logs</h2>
-
-  <a href="/logs/new/" class="submit-btn">+ New Daily Log</a>
-
+{% if logs %}
   {% for log in logs %}
     <div class="log-card">
+
+      <!-- Header: date + sleep score + edit -->
       <div class="log-card-header">
-        <h3>{{ log.date }}</h3>
-        {% if log.sleep_score is not None %}
-          <span class="sleep-score-badge">Sleep Score: {{ log.sleep_score }}</span>
+        <div class="log-date-block">
+          <div class="log-weekday">{{ log.date|date:"l" }}</div>
+          <div class="log-date">{{ log.date|date:"F j" }}</div>
+          <div class="log-year">{{ log.date|date:"Y" }}</div>
+        </div>
+        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
+          {% if log.sleep_score is not None %}
+            <span class="sleep-score-badge">Sleep {{ log.sleep_score }}/100</span>
+          {% endif %}
+          <a class="edit-link" href="{% url 'log_edit' log.id %}">Edit log</a>
+        </div>
+      </div>
+
+      <!-- Stats chips -->
+      {% if log.sleep_hours or log.sleep_quality or log.wellness or log.stress %}
+        <div class="stats-row">
+          {% if log.sleep_hours %}
+            <div class="stat-chip">
+              <span class="chip-label">Sleep</span>
+              <span class="chip-value">{{ log.sleep_hours }}h</span>
+            </div>
+          {% endif %}
+          {% if log.sleep_quality %}
+            <div class="stat-chip">
+              <span class="chip-label">Quality</span>
+              <span class="chip-value">{{ log.sleep_quality }}/10</span>
+            </div>
+          {% endif %}
+          {% if log.wellness %}
+            <div class="stat-chip">
+              <span class="chip-label">Wellness</span>
+              <span class="chip-value">{{ log.wellness }}/10</span>
+            </div>
+          {% endif %}
+          {% if log.stress %}
+            <div class="stat-chip">
+              <span class="chip-label">Stress</span>
+              <span class="chip-value">{{ log.stress }}/10</span>
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      <!-- Notes -->
+      {% if log.notes %}
+        <div class="log-notes">"{{ log.notes }}"</div>
+      {% endif %}
+
+      <!-- Activities -->
+      <div class="activities-section">
+        <div class="activities-header">
+          <span class="activities-label">Activities</span>
+          <a class="add-activity-btn" href="{% url 'activity_add' log.id %}">+ Add Activity</a>
+        </div>
+
+        {% if log.activities.all %}
+          <div class="activity-cards">
+            {% for a in log.activities.all %}
+              <div class="activity-card">
+                <span class="act-type-badge {{ a.activity_type }}">{{ a.activity_type }}</span>
+                <div class="act-name">{{ a.name_of_activity|default:a.activity_type }}</div>
+                <div class="act-meta">
+                  {{ a.duration_min }} min
+                  {% if a.rpe %}
+                    &nbsp;·&nbsp;
+                    {% if a.rpe <= 3 %}
+                      <span class="rpe-dot" style="background:#4CAF50;"></span>
+                    {% elif a.rpe <= 6 %}
+                      <span class="rpe-dot" style="background:#FFC107;"></span>
+                    {% elif a.rpe <= 8 %}
+                      <span class="rpe-dot" style="background:#FF9800;"></span>
+                    {% else %}
+                      <span class="rpe-dot" style="background:#FF5722;"></span>
+                    {% endif %}
+                    RPE {{ a.rpe }}
+                  {% endif %}
+                  {% if a.distance %}
+                    <br>{{ a.distance }} {{ a.distance_unit }}
+                  {% endif %}
+                </div>
+                {% if a.post_workout_feeling %}
+                  <div class="act-feeling">Felt {{ a.get_post_workout_feeling_display|lower }} after</div>
+                {% endif %}
+                {% if a.notes %}
+                  <div class="act-notes">{{ a.notes }}</div>
+                {% endif %}
+                <div class="act-actions">
+                  <a class="act-edit-link" href="{% url 'activity_edit' a.id %}">Edit</a>
+                  <a class="act-delete-link" href="{% url 'activity_delete' a.id %}">Delete</a>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <span class="no-activities">No activities logged yet.</span>
         {% endif %}
       </div>
 
-      <div class="muted">
-        Sleep: {{ log.sleep_hours }} hrs | Quality: {{ log.sleep_quality }} |
-        Wellness: {{ log.wellness }} | Stress: {{ log.stress }}
+      <!-- Footer: actions -->
+      <div class="log-footer">
+        <div class="log-actions">
+          <a class="delete-link" href="{% url 'log_delete' log.id %}">Delete log</a>
+        </div>
       </div>
 
-      {% if log.notes %}
-        <p>{{ log.notes }}</p>
-      {% endif %}
-
-      <div class="actions">
-        <a class="link-btn" href="/logs/{{ log.id }}/activity/new/">+ Add activity</a>
-
-        <form method="post" action="/logs/{{ log.id }}/delete/" style="margin:0;">
-          {% csrf_token %}
-          <button type="submit" class="danger-btn">Delete log</button>
-        </form>
-      </div>
-
-      <h4 style="margin-top:14px;">Activities</h4>
-      <ul>
-        {% for a in log.activities.all %}
-          <li>
-            <strong>{{ a.activity_type }}</strong>
-            {% if a.name_of_activity %}- {{ a.name_of_activity }}{% endif %}
-            — {{ a.duration_min }} min
-            {% if a.rpe %} (RPE {{ a.rpe }}){% endif %}
-            {% if a.distance %} | {{ a.distance }} {{ a.distance_unit }}{% endif %}
-
-            {% if a.notes %}
-              <div style="margin-top: 4px; font-size: 13px; color: #444;">
-                <strong>Notes:</strong> {{ a.notes }}
-              </div>
-            {% endif %}
-          </li>
-        {% empty %}
-          <li>No activities yet.</li>
-        {% endfor %}
-      </ul>
     </div>
-  {% empty %}
-    <p class="muted" style="text-align:center; margin-top:20px;">
-      No logs yet. Click “New Daily Log” to create one.
-    </p>
   {% endfor %}
-</div>
+
+{% else %}
+  <div class="empty-state">
+    <p>No logs yet — start by adding today's entry.</p>
+    <a class="new-log-btn" href="{% url 'log_create' %}">+ New Daily Log</a>
+  </div>
+{% endif %}
+
 {% endblock %}

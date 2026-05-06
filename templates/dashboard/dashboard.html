@@ -42,11 +42,12 @@
   }
 
   .chart-container {
-    margin-top: 25px;
+    margin-top: 16px;
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    height: 120px;
+    height: 150px;
+    gap: 4px;
   }
 
   .bar-wrapper {
@@ -55,20 +56,31 @@
     align-items: center;
     justify-content: flex-end;
     height: 100%;
-    width: 100%;
+    flex: 1;
+  }
+
+  .bar-val-label {
+    font-size: 10px;
+    color: #222;
+    margin-bottom: 3px;
+    font-weight: 600;
+    min-height: 14px;
   }
 
   .bar {
-    width: 20px;
-    background: orange;
-    border-radius: 4px;
+    width: 100%;
+    max-width: 32px;
+    background: linear-gradient(180deg, #f5a623, #c96f00);
+    border-radius: 4px 4px 0 0;
     transition: height 0.3s ease;
+    min-height: 3px;
   }
 
   .bar-label {
-    margin-top: 6px;
-    font-size: 12px;
+    margin-top: 5px;
+    font-size: 11px;
     color: black;
+    font-weight: 600;
   }
 
   .load-bar-container {
@@ -239,13 +251,22 @@
       Activity Summary
     </div>
 
-    <div class="metric-value">
-      Total Activity Duration: {{ total_hours }}h {{ mins }}m | {{ act_count }} activities completed
+    <div style="display:flex; justify-content:center; gap:24px; margin-bottom:4px;">
+      <div style="text-align:center;">
+        <div style="font-size:22px; font-weight:bold;">{{ total_hours }}h {{ mins }}m</div>
+        <div style="font-size:11px; color:#222; text-transform:uppercase; letter-spacing:0.5px;">Active Time</div>
+      </div>
+      <div style="width:1px; background:rgba(0,0,0,0.2);"></div>
+      <div style="text-align:center;">
+        <div style="font-size:22px; font-weight:bold;">{{ act_count }}</div>
+        <div style="font-size:11px; color:#222; text-transform:uppercase; letter-spacing:0.5px;">Activities</div>
+      </div>
     </div>
 
     <div class="chart-container">
       {% for item in chart_data %}
         <div class="bar-wrapper">
+          <div class="bar-val-label">{% if item.minutes %}{{ item.minutes }}m{% endif %}</div>
           <div class="bar" style="height: {{ item.height_percent }}%;"></div>
           <div class="bar-label">{{ item.day_label }}</div>
         </div>
@@ -259,8 +280,9 @@
         Training Load
       </div>
 
-      <div class="metric-value">
-        {{training_load}}
+      <div style="text-align:center; margin-bottom:4px;">
+        <div style="font-size:26px; font-weight:bold;">{{ training_load }}</div>
+        <div style="font-size:11px; color:#222; text-transform:uppercase; letter-spacing:0.5px;">Avg Daily Load</div>
       </div>
 
       <div class="load-container">
@@ -295,23 +317,33 @@
   </a>
   <a href="{% url 'wellness_stress' %}" class="metric-card">
     <div class="metric-title">Wellness vs Stress</div>
-    <div class="metric-value">Avg Wellness: {{avg_wellness}} &nbsp;|&nbsp; Avg Stress: {{avg_stress}}</div>
+    <div style="display:flex; justify-content:center; gap:24px; margin-bottom:8px;">
+      <div style="text-align:center;">
+        <div style="font-size:22px; font-weight:bold; color:#4A90D9;">{{ avg_wellness }}</div>
+        <div style="font-size:11px; color:#222; text-transform:uppercase; letter-spacing:0.5px;">Avg Wellness</div>
+      </div>
+      <div style="width:1px; background:rgba(0,0,0,0.2);"></div>
+      <div style="text-align:center;">
+        <div style="font-size:22px; font-weight:bold; color:#E05C5C;">{{ avg_stress }}</div>
+        <div style="font-size:11px; color:#222; text-transform:uppercase; letter-spacing:0.5px;">Avg Stress</div>
+      </div>
+    </div>
 
-    <div style="display:flex; justify-content:center; gap:16px; margin-bottom:8px; font-size:13px;">
-      <span style="display:flex; align-items:center; gap:5px;">
-        <span style="display:inline-block; width:12px; height:12px; background:#4A90D9; border-radius:2px;"></span> Wellness
+    <div style="display:flex; justify-content:center; gap:16px; margin-bottom:8px; font-size:12px;">
+      <span style="display:flex; align-items:center; gap:4px;">
+        <span style="display:inline-block; width:10px; height:10px; background:#4A90D9; border-radius:2px;"></span> Wellness
       </span>
-      <span style="display:flex; align-items:center; gap:5px;">
-        <span style="display:inline-block; width:12px; height:12px; background:#E05C5C; border-radius:2px;"></span> Stress
+      <span style="display:flex; align-items:center; gap:4px;">
+        <span style="display:inline-block; width:10px; height:10px; background:#E05C5C; border-radius:2px;"></span> Stress
       </span>
     </div>
 
     <div class="chart-container">
       {% for item in wellness_chart_data %}
         <div class="bar-wrapper">
-          <div style="display:flex; align-items:flex-end; gap:3px; height:100%;">
-            <div class="bar" style="background:#4A90D9; height:{{item.wellness_height}}%;"></div>
-            <div class="bar" style="background:#E05C5C; height:{{item.stress_height}}%;"></div>
+          <div style="display:flex; align-items:flex-end; gap:3px; height:100%; width:100%; justify-content:center;">
+            <div style="flex:1; max-width:14px; background:#4A90D9; border-radius:3px 3px 0 0; min-height:3px; height:{{item.wellness_height}}%;"></div>
+            <div style="flex:1; max-width:14px; background:#E05C5C; border-radius:3px 3px 0 0; min-height:3px; height:{{item.stress_height}}%;"></div>
           </div>
           <div class="bar-label">{{ item.day_label }}</div>
         </div>

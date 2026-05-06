@@ -20,11 +20,93 @@
   }
   .back-link:hover { color: white; }
 
+  /* ── Filter bar ── */
+  .filter-bar {
+    background: rgba(130, 130, 130, 0.93);
+    border-radius: 10px;
+    padding: 14px 20px;
+    margin-bottom: 14px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.10);
+  }
+
+  .filter-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #222;
+    margin-bottom: 8px;
+  }
+
+  .filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .filter-btn {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    background: rgba(255,255,255,0.55);
+    color: #111;
+    border: 1px solid rgba(0,0,0,0.15);
+    transition: background 0.12s;
+  }
+  .filter-btn:hover { background: rgba(255,255,255,0.80); }
+  .filter-btn.active { background: #111; color: white; border-color: #111; }
+
+  /* ── Personal bests ── */
+  .bests-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .best-card {
+    background: rgba(130, 130, 130, 0.93);
+    border-radius: 10px;
+    padding: 16px 14px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.10);
+  }
+
+  .best-card .best-icon {
+    font-size: 20px;
+    margin-bottom: 6px;
+  }
+
+  .best-card .best-title {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #333;
+    margin-bottom: 6px;
+  }
+
+  .best-card .best-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: black;
+    line-height: 1.2;
+  }
+
+  .best-card .best-sub {
+    font-size: 11px;
+    color: #333;
+    margin-top: 4px;
+  }
+
+  /* ── Summary bar ── */
   .total-bar {
     background: rgba(130, 130, 130, 0.93);
     border-radius: 10px;
     padding: 18px 30px;
-    margin-bottom: 20px;
+    margin-bottom: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -32,9 +114,7 @@
     box-shadow: 0 4px 15px rgba(0,0,0,0.10);
   }
 
-  .total-item {
-    text-align: center;
-  }
+  .total-item { text-align: center; }
   .total-item .val {
     font-size: 26px;
     font-weight: bold;
@@ -54,6 +134,7 @@
     background: rgba(0,0,0,0.25);
   }
 
+  /* ── Activity list ── */
   .activity-list {
     background: rgba(130, 130, 130, 0.93);
     border-radius: 10px;
@@ -84,14 +165,8 @@
     gap: 10px;
     transition: background 0.15s ease;
   }
-
-  .activity-row:last-child {
-    border-bottom: none;
-  }
-
-  .activity-row:hover {
-    background: rgba(255,255,255,0.10);
-  }
+  .activity-row:last-child { border-bottom: none; }
+  .activity-row:hover { background: rgba(255,255,255,0.10); }
 
   .act-date {
     font-size: 14px;
@@ -184,6 +259,13 @@
     font-size: 14px;
   }
   .btn-logs:hover { opacity: 0.85; }
+
+  .no-results {
+    padding: 40px 20px;
+    text-align: center;
+    color: #333;
+    font-size: 15px;
+  }
 </style>
 
 <div class="page-header">
@@ -192,13 +274,88 @@
 <br>
 <a class="back-link" href="{% url 'dashboard' %}">← Back to Dashboard</a>
 
-{% if activities %}
+<!-- ── Filters ── -->
+<div class="filter-bar">
+  <div class="filter-label">Activity Type</div>
+  <div class="filter-row">
+    <a class="filter-btn {% if not selected_type %}active{% endif %}"
+       href="{% url 'history' %}?type=&period={{ selected_period }}">All</a>
+    {% for value, label in activity_types %}
+      <a class="filter-btn {% if selected_type == value %}active{% endif %}"
+         href="{% url 'history' %}?type={{ value }}&period={{ selected_period }}">{{ label }}</a>
+    {% endfor %}
+  </div>
 
-  <!-- ── Summary bar ── -->
+  <div class="filter-label" style="margin-top:12px;">Time Period</div>
+  <div class="filter-row">
+    <a class="filter-btn {% if not selected_period %}active{% endif %}"
+       href="{% url 'history' %}?type={{ selected_type }}&period=">All Time</a>
+    <a class="filter-btn {% if selected_period == '7' %}active{% endif %}"
+       href="{% url 'history' %}?type={{ selected_type }}&period=7">Last 7 Days</a>
+    <a class="filter-btn {% if selected_period == '30' %}active{% endif %}"
+       href="{% url 'history' %}?type={{ selected_type }}&period=30">Last 30 Days</a>
+    <a class="filter-btn {% if selected_period == '90' %}active{% endif %}"
+       href="{% url 'history' %}?type={{ selected_type }}&period=90">Last 90 Days</a>
+  </div>
+</div>
+
+<!-- ── Personal Bests (all-time) ── -->
+{% if best_duration or best_distance or best_rpe or best_feeling %}
+  <div class="bests-grid">
+
+    {% if best_duration %}
+      <div class="best-card">
+        <div class="best-title">Longest Session</div>
+        <div class="best-value">{{ best_duration.duration_min }} <span style="font-size:13px;font-weight:400;">min</span></div>
+        <div class="best-sub">
+          {{ best_duration.name_of_activity|default:best_duration.activity_type }}<br>
+          {{ best_duration.daily_log.date|date:"M j, Y" }}
+        </div>
+      </div>
+    {% endif %}
+
+    {% if best_distance %}
+      <div class="best-card">
+        <div class="best-title">Farthest Distance</div>
+        <div class="best-value">{{ best_distance.distance }} <span style="font-size:13px;font-weight:400;">{{ best_distance.distance_unit }}</span></div>
+        <div class="best-sub">
+          {{ best_distance.name_of_activity|default:best_distance.activity_type }}<br>
+          {{ best_distance.daily_log.date|date:"M j, Y" }}
+        </div>
+      </div>
+    {% endif %}
+
+    {% if best_rpe %}
+      <div class="best-card">
+        <div class="best-title">Hardest Effort</div>
+        <div class="best-value">{{ best_rpe.rpe }} <span style="font-size:13px;font-weight:400;">/ 10 RPE</span></div>
+        <div class="best-sub">
+          {{ best_rpe.name_of_activity|default:best_rpe.activity_type }}<br>
+          {{ best_rpe.daily_log.date|date:"M j, Y" }}
+        </div>
+      </div>
+    {% endif %}
+
+    {% if best_feeling %}
+      <div class="best-card">
+        <div class="best-title">Best Feeling After</div>
+        <div class="best-value">{{ best_feeling.get_post_workout_feeling_display }}</div>
+        <div class="best-sub">
+          {{ best_feeling.name_of_activity|default:best_feeling.activity_type }}<br>
+          {{ best_feeling.daily_log.date|date:"M j, Y" }}
+        </div>
+      </div>
+    {% endif %}
+
+  </div>
+{% endif %}
+
+<!-- ── Summary bar ── -->
+{% if total_count %}
   <div class="total-bar">
     <div class="total-item">
       <div class="val">{{ total_count }}</div>
-      <div class="lbl">Total Activities</div>
+      <div class="lbl">{% if selected_type or selected_period %}Filtered{% endif %} Activities</div>
     </div>
     {% if first_date and last_date %}
       <div class="divider"></div>
@@ -208,8 +365,10 @@
       </div>
     {% endif %}
   </div>
+{% endif %}
 
-  <!-- ── Activity list ── -->
+<!-- ── Activity list ── -->
+{% if activities %}
   <div class="activity-list">
     <div class="list-header">
       <div>Date</div>
@@ -263,6 +422,11 @@
 
       </div>
     {% endfor %}
+  </div>
+
+{% elif selected_type or selected_period %}
+  <div class="activity-list">
+    <div class="no-results">No activities match the current filters.</div>
   </div>
 
 {% else %}

@@ -49,6 +49,14 @@ class DailyLog(models.Model):
         return round(daily_sleep * 0.6 + daily_quality * 0.4)
     
     @property
+    def grand_total(self):
+        # sleep_score is 0–100, scaled to 0–20 so the total fits the 0–30 range
+        sleep = (self.sleep_score or 0) / 5
+        wellness = float(self.wellness or 0)
+        stress = float(self.stress or 0)
+        return sleep + wellness - stress
+
+    @property
     def workout_recommendation(self):
         score = self.grand_total
 
@@ -60,7 +68,7 @@ class DailyLog(models.Model):
             return "Moderate workout recommended."
         else:
             return "You are recovered. Hard workout is okay."
-    
+
 #This represents one single workout session
 #Wanted to seperate this and daily log so people can put in 
 # #Mulitple activites per day
@@ -97,7 +105,20 @@ class Activity(models.Model):
     )
     distance = models.FloatField(null=True, blank=True, validators=[MinValueValidator(0)])
     distance_unit = models.CharField(max_length=10, choices=DISTANCE_UNITS, default="Miles", null=True, blank=True)
-    
+
+    FEELING_CHOICES = [
+        (1, "Exhausted"),
+        (2, "Tired"),
+        (3, "Okay"),
+        (4, "Good"),
+        (5, "Great"),
+    ]
+    post_workout_feeling = models.PositiveSmallIntegerField(
+        null=True, blank=True,
+        choices=FEELING_CHOICES,
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+    )
+
     notes = models.TextField(blank=True) # user can make notes for themselves for each workout
 
     created_at = models.DateTimeField(auto_now_add=True)
